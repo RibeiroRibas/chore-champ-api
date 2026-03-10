@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validação de Código</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            line-height: 1.5;
+            margin: 0;
+            padding: 0; /* Removido padding para o fundo se estender */
+            background-color: #ffffffff; /* Cor de fundo clara do app */
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #e6e6e6; /* Cinza */
+            border-radius: 8px; /* Mantido para o container principal, se desejar */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Sombra mais sutil */
+            text-align: center;
+        }
+        h2 {
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+        p {
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .instruction {
+            margin-top: 20px;
+            margin-bottom: 30px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .code-box {
+            background-color: #FFF; /* Fundo branco para o código */
+            padding: 20px;
+            margin: 30px auto;
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 8px;
+            border-radius: 12px; /* Bordas mais arredondadas */
+            max-width: 250px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Sombra para o box do código */
+        }
+        .ignore-text, .expires-text {
+            font-size: 14px;
+            color: #777;
+            margin-top: 24px;
+        }
+        .expires-text {
+            margin-top: 40px;
+        }
+        .logo-container {
+            margin-top: 50px;
+            text-align: center;
+        }
+        .logo {
+            max-width: 150px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+
+            padding: 10px; /* Removido padding do logo */
+            background-color: #64524E;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Seu Código de Validação</h2>
+
+        <p class="instruction">
+            Use o código abaixo para continuar com sua solicitação.
+            <br>
+            Este código é de uso único e pessoal.
+        </p>
+
+        <div class="code-box">
+            {{ code }}
+        </div>
+
+        <p class="expires-text">Este código expira em <strong>{{ expiry_minutes }}</strong> minutos.</p>
+        <p class="ignore-text">Se você não fez esta solicitação, por favor, ignore este e-mail.</p>
+
+    </div>
+</body>
+</html>

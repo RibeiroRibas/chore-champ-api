@@ -1,0 +1,254 @@
+# Chore Champ API – Regras de Arquitetura
+
+Este projeto é uma API FastAPI em Python com arquitetura em camadas. Use estas regras para gerar ou alterar arquivos de forma consistente.
+
+---
+
+## 1. Estrutura de pastas (src/)
+
+```
+src/
+├── api/                    # Camada HTTP
+│   ├── handler/            # Error handler global
+│   ├── middlewares/        # Ex.: access_token_middleware
+│   └── v1/
+│       ├── endpoints/      # Um arquivo por recurso (auth_api, users_api)
+│       ├── router_v1.py    # Agrega todos os routers com prefix /v1
+│       ├── dependencies/   # Injeção de use cases (por recurso)
+│       ├── docs/           # Documentação OpenAPI (errors, models)
+│       ├── requests/       # Pydantic request por recurso
+│       └── responses/      # Pydantic response por recurso
+├── application/
+│   ├── schemas/            # DTOs (dataclass) – pode ter subpastas por recurso
+│   └── usecases/           # Use cases por recurso (auth/, users/, ...)
+├── domain/
+│   ├── entities/           # Entidades de domínio (classes simples)
+│   ├── errors/             # BaseError, erros específicos, codes, models
+│   └── services/           # Serviços de domínio (ex.: BCrypt)
+├── repositories/           # Acesso a dados
+│   ├── models/             # SQLAlchemy models + Base
+│   └── *_repository.py     # Um repositório por entidade/agregado
+└── infra/
+    ├── database/           # engine, session, get_db
+    ├── decorators/         # logger, request_logging
+    ├── http/               # Cliente HTTP (interface + impl + errors)
+    └── services/           # JWT, email, etc.
+```
+
+- Imports sempre absolutos com prefixo `src.` (ex.: `from src.domain.entities.user_entity import UserEntity`).
+- Nomes de arquivos e pastas em **snake_case**; classes em **PascalCase**.
+
+---
+
+## 2. Ponto de entrada (main.py)
+
+- FastAPI app com CORS (allow_origins=["*"], allow_credentials=True, allow_methods/headers=["*"]).
+- Router da API: `app.include_router(router_v1, prefix='/api')`.
+- Registrar error handler: `add_error_handler(app)`.
+- Uso de uvicorn com `Config` e `Server` para `if __name__ == "__main__"` (host 0.0.0.0, port 8080).
+
+---
+
+## 3. API – Router e endpoints
+
+### router_v1.py
+
+- `APIRouter(prefix="/v1")`.
+- Importar routers dos endpoints e incluir com `include_router(..., tags=["nome_recurso"])`.
+- Ex.: `router_v1.include_router(auth_api.router, tags=["auth"])`.
+
+### Endpoints (ex.: auth_api.py, users_api.py)
+
+- Um arquivo por recurso; router com `APIRouter(prefix="/recurso")` (ex.: `/auth`, `/users`).
+- Ordem de imports: typing, fastapi/starlette, depois módulos internos (middlewares, dependencies, docs, requests, responses, usecases, infra).
+- Cada rota:
+  - Usar `@request_logging` (de `src.infra.decorators.logger`).
+  - `status_code` explícito (`status.HTTP_201_CREATED`, `HTTP_204_NO_CONTENT`, `HTTP_200_OK`).
+  - `response_model` quando houver corpo de resposta.
+  - `responses=nome_error_docs.metodo` para documentar erros (ex.: `auth_error_docs.login`).
+  - Handler recebe use case via `Depends(nome_funcao_use_case)` e request body ou path/query quando aplicável.
+  - Rotas protegidas: `current_auth_id: Annotated[int, Depends(get_current_auth_id)]`.
+  - Chamar `use_case.execute(...)` com os parâmetros adequados (request, auth_id, etc.).
+
+Exemplo de rota POST com corpo e 204:
+
+```python
+@router.post("",
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses=auth_error_docs.create_auth
+)
+@request_logging
+def create(use_case: Annotated[CreateAuthUseCase, Depends(create_auth_use_case)], request: CreateAuthRequest):
+    return use_case.execute(request=request)
+```
+
+Exemplo de rota GET com response model:
+
+```python
+@router.get("/current",
+    status_code=status.HTTP_200_OK,
+    response_model=CurrentUserResponse,
+    responses=users_error_docs.get_current_user
+)
+@request_logging
+def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_current_user_use_case)],
+                     current_auth_id: Annotated[int, Depends(get_current_auth_id)]) -> CurrentUserResponse:
+    return use_case.execute(auth_id=current_auth_id)
+```
+
+---
+
+## 4. API – Dependencies
+
+- Ficheiros em `src/api/v1/dependencies/` por recurso (ex.: `auth_dependencies.py`, `users_dependencies.py`).
+- Cada função de dependency: recebe `db: Session = Depends(get_db)`, instancia repositórios e use case(s), retorna o use case.
+- Nome da função: `{verbo_ou_acao}_use_case` (ex.: `create_current_user_use_case`, `login_use_case`).
+- Use cases que precisam de outros use cases: instanciar esses use cases dentro da dependency e passá-los no construtor.
+
+---
+
+## 5. API – Requests e Responses
+
+### Requests
+
+- Pydantic `BaseModel` em `src/api/v1/requests/{recurso}/`.
+- Campos com `Field(..., examples=[...])` quando fizer sentido para a documentação.
+- Nome do ficheiro/classe: verbo ou contexto + Request (ex.: `CreateCurrentUserRequest`, `LoginRequest`).
+
+### Responses
+
+- Pydantic `BaseModel` em `src/api/v1/responses/{recurso}/`.
+- Campos com `Field(..., examples=[...])`.
+- Se a resposta mapeia uma entidade, fornecer `@staticmethod def from_entity(entity: XEntity) -> 'XResponse'` que constrói o response a partir da entidade.
+
+---
+
+## 6. API – Docs (OpenAPI)
+
+- Em `src/api/v1/docs/`:
+  - `models/api_error_docs.py`: função `build_doc_errors_response(errors: list[BaseErrorCode])` que devolve `{"description": "...", "model": ErrorModel}`.
+  - `errors/{recurso}_error_docs.py`: dicionários por método (ex.: `create_current_user`, `get_current_user`) em que cada chave é um status code (400, 404, 500, etc.) e o valor é `build_doc_errors_response([...])` com os códigos de erro apropriados.
+- Nos endpoints, usar `responses=nome_error_docs.metodo` para preencher a documentação de erros.
+
+---
+
+## 7. Domain – Entidades
+
+- Classes simples em `src/domain/entities/`, um ficheiro por entidade (ex.: `user_entity.py` → `UserEntity`).
+- Construtor com atributos tipados (id, nome, FKs, etc.); sem herança obrigatória.
+- Podem ter métodos de domínio (ex.: `validate()`, `update_attempts()`) e atributos privados para regras (ex.: `__max_sms_validation_attempts`).
+
+---
+
+## 8. Domain – Erros
+
+### Base
+
+- `src/domain/errors/base_error.py`: `class BaseError(Exception)` com `def __init__(self, code: int)` e `self.code = code`.
+- Erros específicos (ex.: `NotFoundError`, `BadRequestError`, `UnauthorizedError`, `ForbiddenError`, `InternalError`) herdam de `BaseError` e chamam `super().__init__(code)`.
+
+### Códigos de erro
+
+- Em `src/domain/errors/codes/`: um ficheiro por tipo (ex.: `not_found_error_codes.py`, `bad_request_error_codes.py`, `internal_error_codes.py`).
+- Classe herda de `BaseErrorCode` (Enum). Cada membro é uma tupla `(código_int, mensagem_str)`.
+- `BaseErrorCode` define `def code(self): return self.value[0]` e `def message(self): return self.value[1]`.
+- Convenção de códigos: 4xxyyy (ex.: 404301), 5xxyyy (ex.: 500309). Usar `.code()` ao lançar erro (ex.: `NotFoundError(code=NotFoundErrorCodes.USER_NOT_FOUNd.code())`).
+
+### Model de erro para API
+
+- `src/domain/errors/models/error_model.py`: Pydantic model com campo `code: int`.
+- Usado no error handler e em `build_doc_errors_response`.
+
+---
+
+## 9. Application – DTOs e Use Cases
+
+### DTOs (schemas)
+
+- Em `src/application/schemas/`, com subpastas por recurso quando fizer sentido (ex.: `users/create_user_dto.py`, `auth/create_auth_dto.py`).
+- Usar `@dataclass` com campos tipados (ex.: `CreateUserDTO`, `UpdateUserDTO`, `CreateAuthDTO`).
+- Não usar Pydantic aqui; requests/responses da API é que são Pydantic.
+
+### Use cases
+
+- Um ficheiro por use case em `src/application/usecases/{recurso}/` (ex.: `create_current_user_use_case.py`).
+- Classe com nome descritivo (ex.: `CreateCurrentUserUseCase`). Construtor recebe repositórios e, se necessário, outros use cases.
+- Método público: `execute(self, ...)` com parâmetros tipados (request, auth_id, etc.). Retorno tipado quando houver (ex.: `CurrentUserResponse`).
+- Decorar `execute` com `@logging(show_args=True, show_return=True)` (de `src.infra.decorators.logger`).
+- Dentro de `execute`: `try:` chamando método(s) privados (ex.: `__create_user`); `except Exception as error:` se `isinstance(error, BaseError): raise error` senão `raise InternalError(code=InternalErrorCodes.XXX.code())`.
+- Regras de negócio e validações no use case; lançar `BadRequestError`, `NotFoundError`, etc. com o código correspondente.
+- Para respostas que mapeiam entidade: obter entidade do repositório, eventualmente lançar `NotFoundError`, e retornar `XResponse.from_entity(entity)`.
+
+---
+
+## 10. Repositories e Models
+
+### Models (SQLAlchemy)
+
+- Em `src/repositories/models/`. Base partilhada: `from sqlalchemy.ext.declarative import declarative_base` → `Base = declarative_base()`.
+- Ficheiro por entidade (ex.: `user_model.py`). Classe herda de `Base`, `__tablename__ = 'nome_tabela'` em snake_case.
+- Colunas: id (Integer, primary_key, autoincrement), atributos, created_at/updated_at (DateTime, server_default=func.now()) quando aplicável, FKs com ForeignKey.
+- Método `to_entity(self) -> XEntity` que devolve entidade de domínio a partir do model.
+- Se o repositório precisar de reconstruir o model a partir da entidade (ex.: para merge), implementar `@staticmethod def from_entity(entity: XEntity)` no model.
+- Em `models/__init__.py`: exportar `Base` e todos os models (para Alembic e repositórios).
+
+### Repositories
+
+- Um ficheiro por agregado/entidade em `src/repositories/` (ex.: `user_repository.py` → `UserRepository`).
+- Construtor: `def __init__(self, db_session: Session)` e guardar em `self.db_session`.
+- Métodos de escrita (insert, update, delete) com parâmetro `commit: bool = True`; ao final, se `commit`, chamar `self.db_session.commit()`.
+- **O repositório sempre deve retornar uma entidade do domínio e nunca o modelo do SQLAlchemy.** Usar DTOs da application na entrada (ex.: `CreateUserDTO`) e entidades na saída (ex.: `UserEntity | None`). Não expor models na API nem em use cases.
+- Em métodos de leitura, usar `model.to_entity() if model else None` (ou construir a entidade a partir do model). Em métodos que exigem existência, lançar `NotFoundError` com o código apropriado quando não encontrar.
+- Queries com `self.db_session.query(Model).filter_by(...).first()` (ou equivalente). Para delete, pode usar `delete(Model).where(...)` e `execute` + `commit`.
+
+---
+
+## 11. Infra
+
+### Database
+
+- `src/infra/database/database.py`: URL a partir de env (PostgresDsn), `create_engine`, `sessionmaker` → `SessionLocal`, e `get_db()` que faz yield da sessão e close no finally.
+
+### Error handler
+
+- `src/api/handler/error_handler.py`: função `add_error_handler(app)` que regista `@app.exception_handler` para `UnauthorizedError`, `InternalError`, `Exception` (genérico), `NotFoundError`, `BadRequestError`, `ForbiddenError`, `HttpClientError`.
+- Resposta: `JSONResponse(status_code=..., content=ErrorModel(code=exc.code).model_dump())`.
+- Para exceções não mapeadas, usar código de `InfraErrorCodes` (ex.: `UNMAPPED_ERROR`).
+
+### Middleware de autenticação
+
+- Ex.: `get_current_auth_id` em `src/api/middlewares/access_token_middleware.py`: depende de `HTTPBearer`, extrai token e usa `JWTService().decode_auth_id_from_token(token)`; retorna o auth_id (int). Usar em rotas que precisam de utilizador autenticado.
+
+### Decorators
+
+- `request_logging`: em todos os handlers de endpoint.
+- `logging(show_args=..., show_return=...)`: em métodos `execute` dos use cases.
+
+---
+
+## 12. Migrations (Alembic)
+
+- Migrations em `alembic/versions/`. Nome descritivo (ex.: `create_users_table.py`).
+- revision, down_revision, branch_labels, depends_on no topo.
+- `upgrade()`: criar/alterar tabelas com `op.create_table`, `sa.Column`, `ForeignKeyConstraint`, `PrimaryKeyConstraint`.
+- `downgrade()`: reverter (ex.: `op.drop_table('users')`).
+- Manter alinhado com os models em `src/repositories/models/`.
+
+---
+
+## 13. Resumo de convenções
+
+| Camada        | Localização              | Convenção |
+|---------------|--------------------------|-----------|
+| Endpoint      | api/v1/endpoints/        | router por recurso, @request_logging, Depends(use_case), responses=error_docs |
+| Dependencies  | api/v1/dependencies/     | get_db → repositórios → use case; nome *_use_case |
+| Request/Resp  | api/v1/requests|responses/| Pydantic BaseModel, Field(..., examples=...); Response com from_entity se aplicável |
+| Docs          | api/v1/docs/errors/      | build_doc_errors_response por status e método |
+| Entity        | domain/entities/         | Classe simples, atributos tipados |
+| Error         | domain/errors/           | BaseError(code), *ErrorCodes(BaseErrorCode), (code_int, message_str), .code() |
+| DTO           | application/schemas/     | @dataclass |
+| Use case      | application/usecases/    | execute(), @logging, try/except BaseError → InternalError |
+| Repository    | repositories/            | Session no __init__, DTO in / Entity out, commit: bool = True |
+| Model         | repositories/models/     | Base, __tablename__, to_entity(), from_entity() se necessário |
+
+Ao criar um novo recurso (ex.: "tasks"), seguir esta ordem: entidade → model + migration → repositório → DTOs → use cases → dependencies → requests/responses → error_docs → endpoints → registar router em router_v1.
