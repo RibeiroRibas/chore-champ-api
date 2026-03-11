@@ -9,7 +9,7 @@ from src.domain.errors.codes.bad_request_error_codes import BadRequestErrorCode
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.internal_error import InternalError
 from src.infra.decorators.logger import logging
-from src.domain.services.b_crypt_password_service import hash_password
+from src.domain.services.password_service import hash_password
 from src.repositories.auth_repository import AuthRepository
 
 

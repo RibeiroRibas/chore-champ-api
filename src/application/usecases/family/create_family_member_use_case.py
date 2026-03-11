@@ -1,5 +1,3 @@
-import random
-import string
 from collections.abc import Callable
 
 from src.api.v1.requests.users.create_family_member_request import CreateFamilyMemberRequest
@@ -12,18 +10,13 @@ from src.domain.errors.base_error import BaseError
 from src.domain.errors.codes.bad_request_error_codes import BadRequestErrorCode
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.internal_error import InternalError
-from src.domain.services.b_crypt_password_service import hash_password
 from src.domain.services.get_role_by_id_service import GetRoleByIdService
+from src.domain.services.password_service import hash_password, generate_temp_password
 from src.domain.vo.phone import PhoneVO
 from src.infra.decorators.logger import logging
 from src.repositories.auth_repository import AuthRepository
 from src.repositories.family_repository import FamilyRepository
 from src.repositories.user_repository import UserRepository
-
-
-def _generate_temp_password(length: int = 12) -> str:
-    chars = string.ascii_letters + string.digits
-    return "".join(random.choice(chars) for _ in range(length))
 
 
 class CreateFamilyMemberUseCase:
@@ -63,7 +56,7 @@ class CreateFamilyMemberUseCase:
 
         role: RoleEntity = self.get_role_by_id_service.execute(request.role_id)
         phone = PhoneVO.from_raw(request.phone)
-        temp_password = _generate_temp_password()
+        temp_password = generate_temp_password()
         hashed = hash_password(temp_password)
 
         auth_id = self.__create_auth(hashed, request)

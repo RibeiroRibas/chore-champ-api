@@ -1,20 +1,13 @@
-import random
-import string
 from collections.abc import Callable
 
 from src.domain.entities.user_auth_family_entity import UserAuthFamilyEntity
 from src.domain.errors.base_error import BaseError
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.internal_error import InternalError
-from src.domain.services.b_crypt_password_service import hash_password
+from src.domain.services.password_service import hash_password, generate_temp_password
 from src.domain.services.get_user_auth_family_service import GetUserAuthFamilyService
 from src.infra.decorators.logger import logging
 from src.repositories.auth_repository import AuthRepository
-
-
-def _generate_temp_password(length: int = 12) -> str:
-    chars = string.ascii_letters + string.digits
-    return "".join(random.choice(chars) for _ in range(length))
 
 
 class ResendFamilyMemberPasswordUseCase:
@@ -48,7 +41,7 @@ class ResendFamilyMemberPasswordUseCase:
     ) -> None:
         entity: UserAuthFamilyEntity = self.get_user_auth_family_service.execute(user_id, family_id)
 
-        temp_password = _generate_temp_password()
+        temp_password = generate_temp_password()
         hashed = hash_password(temp_password)
         self.auth_repository.update_password(hashed, entity.auth.id)
 

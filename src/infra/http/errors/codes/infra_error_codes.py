@@ -2,6 +2,8 @@ from src.domain.errors.models.base_error_code import BaseErrorCode
 
 
 class InfraErrorCodes(BaseErrorCode):
+    UNPROCESSABLE_ENTITY = (422000, "Unprocessable Entity")
+
     INVALID_TOKEN = (401000, "Token inválido.")
     EXPIRED_TOKEN = (401001, "Token expirado.")
     MISSING_AUTHORIZATION_TOKEN = (401002, "Token de autorização ausente.")

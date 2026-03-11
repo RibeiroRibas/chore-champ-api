@@ -1,19 +1,12 @@
-import os
-
-from src.api.v1.requests.auth.create_auth_request import CreateAuthRequest
 from src.api.v1.requests.auth.update_password_request import UpdatePasswordRequest
-from src.application.schemas.auth.create_auth_dto import CreateAuthDTO
-from src.application.usecases.auth.validate_email_code_checking_use_case import ValidateEmailCodeCheckingUseCase
 from src.domain.entities.auth_entity import AuthEntity
-from src.domain.errors.bad_request_error import BadRequestError
 from src.domain.errors.base_error import BaseError
-from src.domain.errors.codes.bad_request_error_codes import BadRequestErrorCode
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.codes.unauthorized_error_codes import UnauthorizedErrorCodes
 from src.domain.errors.internal_error import InternalError
 from src.domain.errors.unauthorized_error import UnauthorizedError
+from src.domain.services.password_service import hash_password
 from src.infra.decorators.logger import logging
-from src.domain.services.b_crypt_password_service import hash_password
 from src.repositories.auth_repository import AuthRepository
 
 

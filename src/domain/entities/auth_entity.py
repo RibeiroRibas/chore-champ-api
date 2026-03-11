@@ -1,4 +1,4 @@
-from src.domain.services.b_crypt_password_service import verify_password
+from src.domain.services.password_service import verify_password
 
 
 class AuthEntity:

@@ -7,7 +7,7 @@ from src.domain.errors.codes.not_found_error_codes import NotFoundErrorCodes
 from src.domain.errors.internal_error import InternalError
 from src.domain.errors.not_found_error import NotFoundError
 from src.infra.decorators.logger import logging
-from src.domain.services.b_crypt_password_service import hash_password
+from src.domain.services.password_service import hash_password
 from src.repositories.auth_repository import AuthRepository
 
 

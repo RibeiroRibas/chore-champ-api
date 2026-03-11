@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from src.domain.errors.bad_request_error import BadRequestError
@@ -45,6 +46,13 @@ def add_error_handler(app: FastAPI):
         return JSONResponse(
             status_code=400,
             content=ErrorModel(code=exc.code).model_dump()
+        )
+
+    @app.exception_handler(RequestValidationError)
+    async def bad_request_error_handler(_, exc: RequestValidationError):
+        return JSONResponse(
+            status_code=422,
+            content=ErrorModel(code=InfraErrorCodes.UNPROCESSABLE_ENTITY.code()).model_dump()
         )
 
     @app.exception_handler(ForbiddenError)

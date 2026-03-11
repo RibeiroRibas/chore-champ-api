@@ -3,6 +3,9 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+from src.domain.errors.bad_request_error import BadRequestError
+from src.domain.errors.codes.bad_request_error_codes import BadRequestErrorCode
+
 
 @dataclass(frozen=True, slots=True)
 class PhoneVO:
@@ -10,21 +13,19 @@ class PhoneVO:
 
     def __post_init__(self) -> None:
         if not self._digits.isdigit():
-            raise ValueError("Telefone deve conter apenas dígitos após normalização.")
+            raise BadRequestError(code=BadRequestErrorCode.INVALID_PHONE.code())
 
         n = len(self._digits)
         if n not in (8, 9, 10, 11, 12, 13):
-            raise ValueError(
-                "Telefone inválido: quantidade de dígitos deve ser 8, 9, 10, 11, 12 ou 13."
-            )
+            raise BadRequestError(code=BadRequestErrorCode.INVALID_PHONE.code())
 
     @staticmethod
     def normalize(value: str) -> str:
         if value is None:
-            raise ValueError("Telefone não pode ser nulo.")
+            raise BadRequestError(code=BadRequestErrorCode.INVALID_PHONE.code())
         digits = re.sub(r"\D+", "", str(value))
         if not digits:
-            raise ValueError("Telefone inválido: nenhum dígito encontrado.")
+            raise BadRequestError(code=BadRequestErrorCode.INVALID_PHONE.code())
         return digits
 
     @classmethod
@@ -67,7 +68,7 @@ class PhoneVO:
             return f"+{d[:2]} ({d[2:4]}) {d[4:8]}-{d[8:]}"
         if n == 13:  # +## (##) #####-####
             return f"+{d[:2]} ({d[2:4]}) {d[4:9]}-{d[9:]}"
-        raise ValueError("Telefone inválido.")
+        raise BadRequestError(code=BadRequestErrorCode.INVALID_PHONE.code())
 
     def __str__(self) -> str:
         return self.formatted()

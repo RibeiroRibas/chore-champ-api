@@ -1,3 +1,6 @@
+import random
+import string
+
 import bcrypt
 
 def hash_password(plain_password: str) -> str:
@@ -10,3 +13,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         plain_password.encode('utf-8'),
         hashed_password.encode('utf-8')
     )
+
+def generate_temp_password(length: int = 6) -> str:
+    return "".join(random.choice(string.digits) for _ in range(length))
+
