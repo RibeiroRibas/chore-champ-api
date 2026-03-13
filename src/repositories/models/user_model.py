@@ -1,11 +1,15 @@
+from typing import List
+
 from sqlalchemy import Column, Integer, String, DateTime, func, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped
 
 from src.domain.entities.current_user_entity import CurrentUserEntity
 from src.domain.entities.user_auth_family_entity import UserAuthFamilyEntity
 from src.domain.entities.user_entity import UserEntity
 from src.domain.entities.user_family_entity import UserFamilyEntity
 from src.repositories.models import Base
+
+from src.repositories.models.chore_model import ChoreModel
 
 
 class UserModel(Base):
@@ -24,10 +28,16 @@ class UserModel(Base):
     role = relationship("RoleModel", lazy="joined")
     family = relationship("FamilyModel", back_populates="members", lazy="selectin")
     auth = relationship("AuthModel", foreign_keys=[auth_id], lazy="selectin")
+    chores: Mapped[List["ChoreModel"]] = relationship(
+        "ChoreModel",
+        foreign_keys=[ChoreModel.assigned_to_user_id],
+        back_populates="assigned_to_user",
+        lazy="selectin",
+    )
 
     def to_entity(self) -> UserEntity:
         return UserEntity(
-            id=self.id,
+            user_id=self.id,
             name=self.name,
             auth_id=self.auth_id,
             role=self.role.to_entity(),

@@ -56,10 +56,6 @@ def update_family_member_use_case(db: Session = Depends(get_db)) -> UpdateFamily
         get_role_by_id_service=GetRoleByIdService(role_repository=role_repository),
     )
 
-def has_permission_admin_use_case(db: Session = Depends(get_db), auth_id: int = Depends(get_current_auth_id))-> CurrentUserEntity:
-    user_repository = UserRepository(db_session=db)
-    return HasPermissionUseCase(role=UserRoleEnum.ADMIN, repository=user_repository).call(auth_id=auth_id)
-
 
 def delete_family_member_use_case(db: Session = Depends(get_db)) -> DeleteFamilyMemberUseCase:
     user_repository = UserRepository(db_session=db)

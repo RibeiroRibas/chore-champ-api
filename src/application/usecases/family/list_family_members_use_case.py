@@ -18,7 +18,7 @@ class ListFamilyMembersUseCase:
         except Exception as error:
             if isinstance(error, BaseError):
                 raise error
-            raise InternalError(code=InternalErrorCodes.GET_CURRENT_USER_ERROR.code())
+            raise InternalError(code=InternalErrorCodes.LIST_FAMILY_MEMBERS_ERROR.code())
 
     def _list_members(self, family_id: int) -> list[FamilyMemberResponse]:
         family: FamilyEntity = self.family_repository.find_by_id_with_members(family_id)

@@ -8,4 +8,5 @@ class UnauthorizedErrorCodes(BaseErrorCode):
     EMAIL_CODE_INVALID =(401303, "Email code invalid error")
     INVALID_USER_CREDENTIALS = (401304, "Invalid user credentials")
     INSUFFICIENT_PERMISSIONS = (401305, "Insufficient permissions")
-
+    CURRENT_USER_CANNOT_UPDATE_CHORE = (401306, "Current user cannot update or delete chore")
+    CURRENT_USER_CANNOT_DELETE_CHORE = (401307, "Current user cannot delete chore")

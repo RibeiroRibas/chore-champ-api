@@ -19,7 +19,7 @@ class EmailCodeCheckingRepository:
             self.db_session.commit()
 
     def find_by_email(self, email: str) -> EmailCodeCheckingEntity | None:
-        model: EmailCodeCheckingModel = self.db_session.query(EmailCodeCheckingModel).filter_by(email=email).first()
+        model: EmailCodeCheckingModel | None = self.db_session.query(EmailCodeCheckingModel).filter_by(email=email).first()
         return model.to_entity() if model else None
 
     def __delete_by_id(self, email_code_checking_id: int):

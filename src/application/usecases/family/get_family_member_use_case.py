@@ -24,7 +24,7 @@ class GetFamilyMemberUseCase:
         except Exception as error:
             if isinstance(error, BaseError):
                 raise error
-            raise InternalError(code=InternalErrorCodes.GET_CURRENT_USER_ERROR.code())
+            raise InternalError(code=InternalErrorCodes.GET_FAMILY_MEMBER_ERROR.code())
 
     def _get_member(self, user_id: int, family_id: int) -> FamilyMemberResponse:
         entity: UserAuthFamilyEntity = self.get_user_auth_family_service.execute(user_id, family_id)

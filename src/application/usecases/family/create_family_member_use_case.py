@@ -44,7 +44,7 @@ class CreateFamilyMemberUseCase:
         except Exception as error:
             if isinstance(error, BaseError):
                 raise error
-            raise InternalError(code=InternalErrorCodes.CREATE_CURRENT_USER_ERROR.code())
+            raise InternalError(code=InternalErrorCodes.CREATE_FAMILY_MEMBER_ERROR.code())
 
     def _create_member(
             self,

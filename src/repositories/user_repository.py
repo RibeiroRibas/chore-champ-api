@@ -55,7 +55,7 @@ class UserRepository:
 
     def find_by_family_id(self, family_id: int) -> list[UserEntity]:
         models: list[UserModel] | None = self.db_session.query(UserModel).filter_by(family_id=family_id).all()
-        return [m.to_entity() for m in models]
+        return [m.to_entity() for m in models] if models else []
 
     def delete_by_id(self, user_id: int, commit: bool = True) -> None:
         self.db_session.query(UserModel).filter_by(id=user_id).delete()

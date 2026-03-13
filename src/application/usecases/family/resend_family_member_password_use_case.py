@@ -31,7 +31,7 @@ class ResendFamilyMemberPasswordUseCase:
         except Exception as error:
             if isinstance(error, BaseError):
                 raise error
-            raise InternalError(code=InternalErrorCodes.GET_CURRENT_USER_ERROR.code())
+            raise InternalError(code=InternalErrorCodes.RESEND_FAMILY_MEMBER_PASSWORD_ERROR.code())
 
     def _resend_password(
         self,

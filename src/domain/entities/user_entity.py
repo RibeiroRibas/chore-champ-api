@@ -5,7 +5,7 @@ from src.domain.vo.phone import PhoneVO
 class UserEntity:
     def __init__(
         self,
-        id: int,
+        user_id: int,
         name: str,
         auth_id: int,
         role: RoleEntity,
@@ -13,7 +13,7 @@ class UserEntity:
         email: str | None = None,
         avatar: str | None = None,
     ):
-        self.id = id
+        self.id = user_id
         self.name = name
         self.auth_id = auth_id
         self.role = role

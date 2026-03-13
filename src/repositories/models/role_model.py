@@ -11,4 +11,4 @@ class RoleModel(Base):
     name = Column(String, nullable=False)
 
     def to_entity(self) -> RoleEntity:
-        return RoleEntity(id=self.id, name=self.name)
+        return RoleEntity(role_id=self.id, name=self.name)

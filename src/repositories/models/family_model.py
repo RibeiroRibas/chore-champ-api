@@ -4,7 +4,9 @@ from sqlalchemy import Column, Integer, String, DateTime, func
 from sqlalchemy.orm import relationship, Mapped
 
 from src.domain.entities.family_entity import FamilyEntity
-from src.repositories.models import Base, UserModel
+from src.repositories.models import Base
+from src.repositories.models.chore_model import ChoreModel
+from src.repositories.models.user_model import UserModel
 
 
 class FamilyModel(Base):
@@ -17,6 +19,11 @@ class FamilyModel(Base):
 
     members: Mapped[List["UserModel"]] = relationship(
         "UserModel",
+        back_populates="family",
+        lazy="selectin",
+    )
+    chores: Mapped[List["ChoreModel"]] = relationship(
+        "ChoreModel",
         back_populates="family",
         lazy="selectin",
     )

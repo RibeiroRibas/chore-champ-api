@@ -1,19 +1,13 @@
 import os
-import random
 
-from src.application.schemas.create_email_code_checking_dto import CreateEmailCodeCheckingDTO
 from src.application.usecases.auth.send_email_verification_code_use_case import SendEmailVerificationCodeUseCase
+from src.domain.errors.base_error import BaseError
+from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.codes.not_found_error_codes import NotFoundErrorCodes
+from src.domain.errors.internal_error import InternalError
 from src.domain.errors.not_found_error import NotFoundError
 from src.infra.decorators.logger import logging
-from src.domain.errors.bad_request_error import BadRequestError
-from src.domain.errors.base_error import BaseError
-from src.domain.errors.codes.bad_request_error_codes import BadRequestErrorCode
-from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
-from src.domain.errors.internal_error import InternalError
-from src.infra.services import send_email_service
 from src.repositories.auth_repository import AuthRepository
-from src.repositories.email_code_checking_repository import EmailCodeCheckingRepository
 
 
 class SendEmailForgetPasswordCodeUseCase:

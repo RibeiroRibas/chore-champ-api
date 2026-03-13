@@ -5,7 +5,9 @@ from starlette import status
 
 from src.api.v1.dependencies.family_members_dependencies import list_family_members_use_case, \
     create_family_member_use_case, get_family_member_use_case, update_family_member_use_case, \
-    delete_family_member_use_case, resend_family_member_password_use_case, has_permission_admin_use_case
+    delete_family_member_use_case, resend_family_member_password_use_case
+from src.api.v1.dependencies.shared_dependencies import has_permission_admin_use_case, get_current_user_entity
+from src.api.v1.docs.errors import family_members_error_docs
 from src.api.v1.requests.users.create_family_member_request import CreateFamilyMemberRequest
 from src.api.v1.requests.users.update_family_member_request import UpdateFamilyMemberRequest
 from src.api.v1.responses.users.family_member_response import FamilyMemberResponse
@@ -36,10 +38,11 @@ def _schedule_send_temp_password(
     "",
     status_code=status.HTTP_200_OK,
     response_model=list[FamilyMemberResponse],
+    responses=family_members_error_docs.list_family_members,
 )
 @request_logging
 def list_family_members(
-    user: Annotated[CurrentUserEntity, Depends(has_permission_admin_use_case)],
+    user: Annotated[CurrentUserEntity, Depends(get_current_user_entity)],
     use_case: Annotated[ListFamilyMembersUseCase, Depends(list_family_members_use_case)],
 ) -> list[FamilyMemberResponse]:
     return use_case.execute(family_id=user.family_id)
@@ -49,6 +52,7 @@ def list_family_members(
     "",
     status_code=status.HTTP_201_CREATED,
     response_model=FamilyMemberResponse,
+    responses=family_members_error_docs.create_family_member,
 )
 @request_logging
 def create_family_member(
@@ -71,12 +75,13 @@ def create_family_member(
 @router.get(
     "/{user_id:int}",
     status_code=status.HTTP_200_OK,
-    response_model=FamilyMemberResponse
+    response_model=FamilyMemberResponse,
+    responses=family_members_error_docs.get_family_member,
 )
 @request_logging
 def get_family_member(
     user_id: int,
-    user: Annotated[CurrentUserEntity, Depends(has_permission_admin_use_case)],
+    user: Annotated[CurrentUserEntity, Depends(get_current_user_entity)],
     use_case: Annotated[GetFamilyMemberUseCase, Depends(get_family_member_use_case)],
 ) -> FamilyMemberResponse:
     return use_case.execute(user_id=user_id, family_id=user.family_id)
@@ -86,6 +91,7 @@ def get_family_member(
     "/{user_id:int}",
     status_code=status.HTTP_200_OK,
     response_model=FamilyMemberResponse,
+    responses=family_members_error_docs.update_family_member,
 )
 @request_logging
 def update_family_member(
@@ -100,6 +106,7 @@ def update_family_member(
 @router.delete(
     "/{user_id:int}",
     status_code=status.HTTP_204_NO_CONTENT,
+    responses=family_members_error_docs.delete_family_member,
 )
 @request_logging
 def delete_family_member(
@@ -113,6 +120,7 @@ def delete_family_member(
 @router.post(
     "/{user_id:int}/resend-password",
     status_code=status.HTTP_204_NO_CONTENT,
+    responses=family_members_error_docs.resend_family_member_password,
 )
 @request_logging
 def resend_family_member_password(

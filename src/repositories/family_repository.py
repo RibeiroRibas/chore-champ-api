@@ -41,7 +41,7 @@ class FamilyRepository:
             return None
         members = [
             UserEntity(
-                id=member.id,
+                user_id=member.id,
                 name=member.name,
                 auth_id=member.auth_id,
                 role=member.role.to_entity(),

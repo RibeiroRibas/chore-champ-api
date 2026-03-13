@@ -42,7 +42,7 @@ class SendEmailVerificationCodeUseCase:
         send_email_service.send(template_str=rendered_template, email=email, subject=subject)
 
     def __create_email_code_checking(self, email: str, four_digit_code_generated: str):
-        email_code_checking = CreateEmailCodeCheckingDTO(email=email, code=four_digit_code_generated)
+        email_code_checking = CreateEmailCodeCheckingDTO(email=email, code=int(four_digit_code_generated))
         self.email_code_checking_repository.delete_and_insert(email_code_checking)
 
     def __render_template(self, code: str) -> str:

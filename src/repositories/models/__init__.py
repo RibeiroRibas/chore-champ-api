@@ -7,3 +7,4 @@ from .auth_model import AuthModel
 from .user_model import UserModel
 from .role_model import RoleModel
 from .family_model import FamilyModel
+from .chore_model import ChoreModel

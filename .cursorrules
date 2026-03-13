@@ -65,9 +65,10 @@ src/
   - Usar `@request_logging` (de `src.infra.decorators.logger`).
   - `status_code` explícito (`status.HTTP_201_CREATED`, `HTTP_204_NO_CONTENT`, `HTTP_200_OK`).
   - `response_model` quando houver corpo de resposta.
-  - `responses=nome_error_docs.metodo` para documentar erros (ex.: `auth_error_docs.login`).
+  - `responses=nome_error_docs.metodo` para documentar erros (ex.: `auth_error_docs.login`). Documentar todos os códigos de error lançados durante o fluxo de requisição.
   - Handler recebe use case via `Depends(nome_funcao_use_case)` e request body ou path/query quando aplicável.
   - Rotas protegidas: `current_auth_id: Annotated[int, Depends(get_current_auth_id)]`.
+  - Duas formas de obter `CurrentUserEntity`, quando a rota não é protegida: `Depends(has_permission_admin_use_case)` ou quando a rota não é protegida: `Depends(get_current_user_entity)`.
   - Chamar `use_case.execute(...)` com os parâmetros adequados (request, auth_id, etc.).
 
 Exemplo de rota POST com corpo e 204:
@@ -93,6 +94,34 @@ Exemplo de rota GET com response model:
 @request_logging
 def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_current_user_use_case)],
                      current_auth_id: Annotated[int, Depends(get_current_auth_id)]) -> CurrentUserResponse:
+    return use_case.execute(auth_id=current_auth_id)
+```
+
+Exemplo de rota com `CurrentUserEntity` e rota protegida:
+
+```python
+@router.get("/current",
+    status_code=status.HTTP_200_OK,
+    response_model=CurrentUserResponse,
+    responses=users_error_docs.get_current_user
+)
+@request_logging
+def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_current_user_use_case)],
+                     user: Annotated[CurrentUserEntity, Depends(has_permission_admin_use_case)]) -> CurrentUserResponse:
+    return use_case.execute(auth_id=current_auth_id)
+```
+
+Exemplo de rota com `CurrentUserEntity` e rota não protegida:
+
+```python
+@router.get("/current",
+    status_code=status.HTTP_200_OK,
+    response_model=CurrentUserResponse,
+    responses=users_error_docs.get_current_user
+)
+@request_logging
+def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_current_user_use_case)],
+                     user: Annotated[CurrentUserEntity, Depends(get_current_user_entity)]) -> CurrentUserResponse:
     return use_case.execute(auth_id=current_auth_id)
 ```
 
@@ -129,12 +158,15 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
   - `models/api_error_docs.py`: função `build_doc_errors_response(errors: list[BaseErrorCode])` que devolve `{"description": "...", "model": ErrorModel}`.
   - `errors/{recurso}_error_docs.py`: dicionários por método (ex.: `create_current_user`, `get_current_user`) em que cada chave é um status code (400, 404, 500, etc.) e o valor é `build_doc_errors_response([...])` com os códigos de erro apropriados.
 - Nos endpoints, usar `responses=nome_error_docs.metodo` para preencher a documentação de erros.
+- Todos os erros lançados durante o fluxo de requisição devem ser documentados.
 
 ---
 
 ## 7. Domain – Entidades
 
 - Classes simples em `src/domain/entities/`, um ficheiro por entidade (ex.: `user_entity.py` → `UserEntity`).
+- Pode lançar um erro de domínio relacionado a regra de negócio se possível ou quando fizer sentido.
+- Pode conter regras de negócio se for específico daquela entidade.
 - Construtor com atributos tipados (id, nome, FKs, etc.); sem herança obrigatória.
 - Podem ter métodos de domínio (ex.: `validate()`, `update_attempts()`) e atributos privados para regras (ex.: `__max_sms_validation_attempts`).
 
@@ -176,8 +208,10 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 - Método público: `execute(self, ...)` com parâmetros tipados (request, auth_id, etc.). Retorno tipado quando houver (ex.: `CurrentUserResponse`).
 - Decorar `execute` com `@logging(show_args=True, show_return=True)` (de `src.infra.decorators.logger`).
 - Dentro de `execute`: `try:` chamando método(s) privados (ex.: `__create_user`); `except Exception as error:` se `isinstance(error, BaseError): raise error` senão `raise InternalError(code=InternalErrorCodes.XXX.code())`.
-- Regras de negócio e validações no use case; lançar `BadRequestError`, `NotFoundError`, etc. com o código correspondente.
+- Regras de negócio de preferência nos serviços de domínio ou nas entidades de domínio, validações no use case; lançar `BadRequestError`, `NotFoundError`, etc. com o código correspondente.
 - Para respostas que mapeiam entidade: obter entidade do repositório, eventualmente lançar `NotFoundError`, e retornar `XResponse.from_entity(entity)`.
+- Nunca usar `kwargs**`, `tuples` dou '*' quando está lidando com conversções ou tipagem.
+- Sempre lançar um `raise InternalError(code=InternalErrorCodes.XXX.code())` com o código apropriado para caso de uso, ele deve ser unico e não pode ser reaproveitado por outro caso de uso.
 
 ---
 
@@ -191,6 +225,12 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 - Método `to_entity(self) -> XEntity` que devolve entidade de domínio a partir do model.
 - Se o repositório precisar de reconstruir o model a partir da entidade (ex.: para merge), implementar `@staticmethod def from_entity(entity: XEntity)` no model.
 - Em `models/__init__.py`: exportar `Base` e todos os models (para Alembic e repositórios).
+- Sempre que possível dê preferência para relacionamentos com `selectin`. (ex.: `family = relationship("FamilyModel", back_populates="chores", lazy="selectin"`) ou (ex.: assigned_to_user = relationship(
+        "UserModel",
+        foreign_keys=[assigned_to_user_id],
+        back_populates="chores",
+        lazy="selectin",
+    )`)
 
 ### Repositories
 
@@ -198,7 +238,8 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 - Construtor: `def __init__(self, db_session: Session)` e guardar em `self.db_session`.
 - Métodos de escrita (insert, update, delete) com parâmetro `commit: bool = True`; ao final, se `commit`, chamar `self.db_session.commit()`.
 - **O repositório sempre deve retornar uma entidade do domínio e nunca o modelo do SQLAlchemy.** Usar DTOs da application na entrada (ex.: `CreateUserDTO`) e entidades na saída (ex.: `UserEntity | None`). Não expor models na API nem em use cases.
-- Em métodos de leitura, usar `model.to_entity() if model else None` (ou construir a entidade a partir do model). Em métodos que exigem existência, lançar `NotFoundError` com o código apropriado quando não encontrar.
+- No máximo 3 parâmetros por método, criar DTO caso isso aconteça.
+- Em métodos de leitura, usar `model.to_entity() if model else None` (ou construir a entidade a partir do model). Em métodos que exigem existência (ex.: delete, update), lançar `NotFoundError` com o código apropriado quando não encontrar.
 - Queries com `self.db_session.query(Model).filter_by(...).first()` (ou equivalente). Para delete, pode usar `delete(Model).where(...)` e `execute` + `commit`.
 
 ---

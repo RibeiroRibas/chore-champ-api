@@ -7,3 +7,5 @@ class NotFoundErrorCodes(BaseErrorCode):
     AUTH_NOT_FOUND = (404302, "Auth not found")
     ROLE_NOT_FOUND = (404303, "Role not found")
     FAMILY_NOT_FOUND = (404304, "Family not found")
+    CHORE_NOT_FOUND = (404305, "Chore not found")
+    CURRENT_USER_NOT_FOUND = (404306, "Current user not found")
