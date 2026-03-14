@@ -99,3 +99,66 @@ delete_chore = {
     ),
 }
 
+assign_chore_to_me = {
+    400: build_doc_errors_response(
+        [
+            BadRequestErrorCode.CHORE_ALREADY_ASSIGNED,
+            BadRequestErrorCode.CHORE_ALREADY_COMPLETED,
+        ]
+    ),
+    404: build_doc_errors_response(
+        [
+            NotFoundErrorCodes.CURRENT_USER_NOT_FOUND,
+            NotFoundErrorCodes.CHORE_NOT_FOUND,
+        ]
+    ),
+    500: build_doc_errors_response(
+        [
+            InternalErrorCodes.ASSIGN_CHORE_TO_ME_ERROR,
+            InternalErrorCodes.GET_USER_FAMILY_ERROR,
+        ]
+    ),
+}
+
+remove_assign_chore_to_me = {
+    400: build_doc_errors_response(
+        [
+            BadRequestErrorCode.CHORE_ALREADY_COMPLETED,
+            BadRequestErrorCode.CHORE_CANNOT_REMOVE_ASSIGNMENT,
+        ]
+    ),
+    404: build_doc_errors_response(
+        [
+            NotFoundErrorCodes.CURRENT_USER_NOT_FOUND,
+            NotFoundErrorCodes.CHORE_NOT_FOUND,
+        ]
+    ),
+    500: build_doc_errors_response(
+        [
+            InternalErrorCodes.REMOVE_ASSIGN_CHORE_TO_ME_ERROR,
+            InternalErrorCodes.GET_USER_FAMILY_ERROR,
+        ]
+    ),
+}
+
+complete_chore = {
+    400: build_doc_errors_response(
+        [
+            BadRequestErrorCode.CHORE_ALREADY_COMPLETED,
+            BadRequestErrorCode.CHORE_CANNOT_COMPLETE,
+        ]
+    ),
+    404: build_doc_errors_response(
+        [
+            NotFoundErrorCodes.CURRENT_USER_NOT_FOUND,
+            NotFoundErrorCodes.CHORE_NOT_FOUND,
+        ]
+    ),
+    500: build_doc_errors_response(
+        [
+            InternalErrorCodes.COMPLETE_CHORE_ERROR,
+            InternalErrorCodes.GET_USER_FAMILY_ERROR,
+        ]
+    ),
+}
+

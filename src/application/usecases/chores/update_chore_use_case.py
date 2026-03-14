@@ -51,5 +51,5 @@ class UpdateChoreUseCase:
         entity: ChoreUserEntity = self.get_chore_user_service.execute(chore_id=chore_id,
                                                                       family_id=current_user.family_id)
 
-        entity.validate_has_update_permission(current_user_id=current_user.user_id)
+        entity.chore.validate_has_update_permission(current_user=current_user)
         entity.chore.validate_can_update_or_delete()

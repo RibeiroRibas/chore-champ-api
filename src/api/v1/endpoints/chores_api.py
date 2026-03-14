@@ -5,18 +5,24 @@ from fastapi import APIRouter, Depends
 from starlette import status
 
 from src.api.v1.dependencies.chores_dependencies import (
+    assign_chore_to_me_use_case,
+    complete_chore_use_case,
     list_chores_use_case,
     create_chore_use_case,
     get_chore_use_case,
     update_chore_use_case,
     delete_chore_use_case,
+    remove_assign_chore_to_me_use_case,
 )
 from src.api.v1.dependencies.shared_dependencies import get_current_user_entity
 from src.api.v1.docs.errors import chores_error_docs
 from src.api.v1.requests.chores.create_chore_request import CreateChoreRequest
 from src.api.v1.requests.chores.update_chore_request import UpdateChoreRequest
 from src.api.v1.responses.chores.chore_response import ChoreResponse
+from src.application.usecases.chores.assign_chore_to_me_use_case import AssignChoreToMeUseCase
+from src.application.usecases.chores.complete_chore_use_case import CompleteChoreUseCase
 from src.application.usecases.chores.create_chore_use_case import CreateChoreUseCase
+from src.application.usecases.chores.remove_assign_chore_to_me_use_case import RemoveAssignChoreToMeUseCase
 from src.application.usecases.chores.delete_chore_use_case import DeleteChoreUseCase
 from src.application.usecases.chores.get_chore_use_case import GetChoreUseCase
 from src.application.usecases.chores.list_chores_use_case import ListChoresUseCase
@@ -90,6 +96,51 @@ def update_chore(
     return use_case.execute(chore_id=chore_id, current_user=user, request=request)
 
 
+@router.patch(
+    "/{chore_id:int}/assign-to-me",
+    status_code=status.HTTP_200_OK,
+    response_model=ChoreResponse,
+    responses=chores_error_docs.assign_chore_to_me,
+)
+@request_logging
+def assign_chore_to_me(
+    chore_id: int,
+    user: Annotated[CurrentUserEntity, Depends(get_current_user_entity)],
+    use_case: Annotated[AssignChoreToMeUseCase, Depends(assign_chore_to_me_use_case)],
+) -> ChoreResponse:
+    return use_case.execute(chore_id=chore_id, current_user=user)
+
+
+@router.patch(
+    "/{chore_id:int}/remove-assign-to-me",
+    status_code=status.HTTP_200_OK,
+    response_model=ChoreResponse,
+    responses=chores_error_docs.remove_assign_chore_to_me,
+)
+@request_logging
+def remove_assign_chore_to_me(
+    chore_id: int,
+    user: Annotated[CurrentUserEntity, Depends(get_current_user_entity)],
+    use_case: Annotated[RemoveAssignChoreToMeUseCase, Depends(remove_assign_chore_to_me_use_case)],
+) -> ChoreResponse:
+    return use_case.execute(chore_id=chore_id, current_user=user)
+
+
+@router.patch(
+    "/{chore_id:int}/complete",
+    status_code=status.HTTP_200_OK,
+    response_model=ChoreResponse,
+    responses=chores_error_docs.complete_chore,
+)
+@request_logging
+def complete_chore(
+    chore_id: int,
+    user: Annotated[CurrentUserEntity, Depends(get_current_user_entity)],
+    use_case: Annotated[CompleteChoreUseCase, Depends(complete_chore_use_case)],
+) -> ChoreResponse:
+    return use_case.execute(chore_id=chore_id, current_user=user)
+
+
 @router.delete(
     "/{chore_id:int}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -101,4 +152,4 @@ def delete_chore(
     user: Annotated[CurrentUserEntity, Depends(get_current_user_entity)],
     use_case: Annotated[DeleteChoreUseCase, Depends(delete_chore_use_case)],
 ) -> None:
-    use_case.execute(chore_id=chore_id, family_id=user.family_id)
+    use_case.execute(chore_id=chore_id, current_user=user)
