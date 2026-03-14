@@ -26,3 +26,8 @@ class InternalErrorCodes(BaseErrorCode):
     DELETE_FAMILY_MEMBER_ERROR = (500322, "Delete family member operation error")
     LIST_FAMILY_MEMBERS_ERROR = (500323, "List family members error")
     RESEND_FAMILY_MEMBER_PASSWORD_ERROR = (500324, "Resend family member password error")
+    REFRESH_TOKEN_ERROR = (500325, "Refresh token internal error")
+    GENERATE_REFRESH_TOKEN_ERROR = (500326, "Generate refresh token internal error")
+    ASSIGN_CHORE_TO_ME_ERROR = (500327, "Assign chore to me operation error")
+    REMOVE_ASSIGN_CHORE_TO_ME_ERROR = (500328, "Remove assign chore to me operation error")
+    COMPLETE_CHORE_ERROR = (500329, "Complete chore operation error")

@@ -1,5 +1,4 @@
-from src.domain.entities.role_entity import RoleEntity
-from src.domain.vo.phone import PhoneVO
+from src.domain.enums.user_role_enum import UserRoleEnum
 
 
 class CurrentUserEntity:
@@ -8,3 +7,6 @@ class CurrentUserEntity:
         self.auth_id = auth_id
         self.role_id = role_id
         self.family_id = family_id
+
+    def is_admin(self) -> bool:
+        return self.role_id == UserRoleEnum.ADMIN.value[0]
