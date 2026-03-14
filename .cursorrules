@@ -165,6 +165,7 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 ## 7. Domain – Entidades
 
 - Classes simples em `src/domain/entities/`, um ficheiro por entidade (ex.: `user_entity.py` → `UserEntity`).
+- **Regras de negócio têm prioridade em ficar dentro das entidades.** Sempre que uma regra for específica do domínio da entidade (ex.: “só pode atribuir se não estiver concluída”, “só pode remover atribuição se for o responsável”), implemente-a em métodos da própria entidade (ex.: `validate_can_assign_to_current_user()`, `validate_can_remove_assignment()`) e invoque esses métodos no use case. Evite duplicar condições nos use cases; o use case orquestra e delega a validação à entidade.
 - Pode lançar um erro de domínio relacionado a regra de negócio se possível ou quando fizer sentido.
 - Pode conter regras de negócio se for específico daquela entidade.
 - Construtor com atributos tipados (id, nome, FKs, etc.); sem herança obrigatória.
