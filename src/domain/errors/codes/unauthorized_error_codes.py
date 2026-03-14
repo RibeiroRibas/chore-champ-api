@@ -10,3 +10,4 @@ class UnauthorizedErrorCodes(BaseErrorCode):
     INSUFFICIENT_PERMISSIONS = (401305, "Insufficient permissions")
     CURRENT_USER_CANNOT_UPDATE_CHORE = (401306, "Current user cannot update or delete chore")
     CURRENT_USER_CANNOT_DELETE_CHORE = (401307, "Current user cannot delete chore")
+    REFRESH_TOKEN_INVALID = (401308, "Refresh token not found or invalid")

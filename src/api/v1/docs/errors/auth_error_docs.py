@@ -78,7 +78,20 @@ login = {
         ]
     ),
     500: build_doc_errors_response(
-        [InternalErrorCodes.LOGIN_INTERNAL_ERROR]
+        [InternalErrorCodes.LOGIN_INTERNAL_ERROR,
+         InternalErrorCodes.GENERATE_REFRESH_TOKEN_ERROR]
+    )
+}
+
+refresh = {
+    401: build_doc_errors_response(
+        [
+            UnauthorizedErrorCodes.REFRESH_TOKEN_INVALID,
+        ]
+    ),
+    500: build_doc_errors_response(
+        [InternalErrorCodes.REFRESH_TOKEN_ERROR,
+         InternalErrorCodes.GENERATE_REFRESH_TOKEN_ERROR]
     )
 }
 
