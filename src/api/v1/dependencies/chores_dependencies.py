@@ -4,28 +4,37 @@ from sqlalchemy.orm import Session
 from src.application.usecases.chores.assign_chore_to_me_use_case import AssignChoreToMeUseCase
 from src.application.usecases.chores.complete_chore_use_case import CompleteChoreUseCase
 from src.application.usecases.chores.create_chore_use_case import CreateChoreUseCase
-from src.application.usecases.chores.remove_assign_chore_to_me_use_case import RemoveAssignChoreToMeUseCase
 from src.application.usecases.chores.delete_chore_use_case import DeleteChoreUseCase
 from src.application.usecases.chores.get_chore_use_case import GetChoreUseCase
-from src.application.usecases.chores.list_chores_use_case import ListChoresUseCase
+from src.application.usecases.chores.list_all_chores_use_case import ListAllChoresUseCase
+from src.application.usecases.chores.list_today_chores_use_case import ListTodayChoresUseCase
+from src.application.usecases.chores.remove_assign_chore_to_me_use_case import RemoveAssignChoreToMeUseCase
 from src.application.usecases.chores.update_chore_use_case import UpdateChoreUseCase
 from src.domain.services.get_chore_service import GetChoreService
 from src.domain.services.get_chore_user_service import GetChoreUSerService
-from src.domain.services.get_user_family_service import GetUserFamilyService
+from src.domain.services.recurring_chore_service import RecurringChoreService
 from src.infra.database.database import get_db
 from src.repositories.chore_repository import ChoreRepository
-from src.repositories.user_repository import UserRepository
+from src.repositories.recurring_chore_repository import RecurringChoreRepository
 
 
-def list_chores_use_case(db: Session = Depends(get_db)) -> ListChoresUseCase:
-    return ListChoresUseCase(chore_repository=ChoreRepository(db_session=db))
+def list_today_chores_use_case(db: Session = Depends(get_db)) -> ListTodayChoresUseCase:
+    return ListTodayChoresUseCase(
+        chore_repository=ChoreRepository(db_session=db),
+        recurring_chore_repository=RecurringChoreRepository(db_session=db),
+    )
+
+
+def list_all_chores_use_case(db: Session = Depends(get_db)) -> ListAllChoresUseCase:
+    return ListAllChoresUseCase(chore_repository=ChoreRepository(db_session=db))
 
 
 def create_chore_use_case(db: Session = Depends(get_db)) -> CreateChoreUseCase:
-    user_repository = UserRepository(db_session=db)
+    chore_repository = ChoreRepository(db_session=db)
+    recurring_chore_repository = RecurringChoreRepository(db_session=db)
     return CreateChoreUseCase(
-        chore_repository=ChoreRepository(db_session=db),
-        get_user_family_service=GetUserFamilyService(user_repository=user_repository),
+        chore_repository=chore_repository,
+        recurring_chore_repository=recurring_chore_repository,
     )
 
 
@@ -34,9 +43,16 @@ def get_chore_use_case(db: Session = Depends(get_db)) -> GetChoreUseCase:
 
 
 def update_chore_use_case(db: Session = Depends(get_db)) -> UpdateChoreUseCase:
+    chore_repository = ChoreRepository(db_session=db)
+    recurring_chore_repository = RecurringChoreRepository(db_session=db)
+    recurring_chore_service = RecurringChoreService(
+        chore_repository=chore_repository,
+        recurring_chore_repository=recurring_chore_repository,
+    )
     return UpdateChoreUseCase(
-        chore_repository=ChoreRepository(db_session=db),
-        get_chore_user_service=GetChoreUSerService(chore_repository=ChoreRepository(db_session=db)),
+        chore_repository=chore_repository,
+        get_chore_service=GetChoreService(chore_repository=chore_repository),
+        recurring_chore_service=recurring_chore_service,
     )
 
 
@@ -65,9 +81,14 @@ def remove_assign_chore_to_me_use_case(db: Session = Depends(get_db)) -> RemoveA
 
 
 def complete_chore_use_case(db: Session = Depends(get_db)) -> CompleteChoreUseCase:
-    repository = ChoreRepository(db_session=db)
-    get_chore_service = GetChoreService(chore_repository=repository)
+    chore_repository = ChoreRepository(db_session=db)
+    recurring_chore_repository = RecurringChoreRepository(db_session=db)
+    recurring_chore_service = RecurringChoreService(
+        chore_repository=chore_repository,
+        recurring_chore_repository=recurring_chore_repository,
+    )
     return CompleteChoreUseCase(
-        chore_repository=repository,
-        get_chore_service=get_chore_service,
+        chore_repository=chore_repository,
+        get_chore_service=GetChoreService(chore_repository=chore_repository),
+        recurring_chore_service=recurring_chore_service,
     )

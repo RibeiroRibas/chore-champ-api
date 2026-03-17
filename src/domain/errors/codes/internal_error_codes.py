@@ -31,3 +31,4 @@ class InternalErrorCodes(BaseErrorCode):
     ASSIGN_CHORE_TO_ME_ERROR = (500327, "Assign chore to me operation error")
     REMOVE_ASSIGN_CHORE_TO_ME_ERROR = (500328, "Remove assign chore to me operation error")
     COMPLETE_CHORE_ERROR = (500329, "Complete chore operation error")
+    LIST_DAYS_OF_WEEK_ERROR = (500330, "List days of week operation error")

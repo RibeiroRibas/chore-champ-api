@@ -12,3 +12,4 @@ class BadRequestErrorCode(BaseErrorCode):
     CHORE_ALREADY_COMPLETED = (400307, "Cannot assign a completed chore")
     CHORE_CANNOT_REMOVE_ASSIGNMENT = (400308, "Can only remove assignment from a chore assigned to you and not completed")
     CHORE_CANNOT_COMPLETE = (400309, "Only the assignee or an admin can complete this chore")
+    RECURRENCE_DAY_IDS_REQUIRED = (400310, "Recurrence day ids are required")

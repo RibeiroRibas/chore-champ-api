@@ -5,15 +5,18 @@ from src.domain.entities.current_user_entity import CurrentUserEntity
 from src.domain.errors.base_error import BaseError
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.internal_error import InternalError
+from src.domain.schemas.recurring_chore_dto import RecurringChoreDTO
 from src.domain.services.get_chore_service import GetChoreService
+from src.domain.services.recurring_chore_service import RecurringChoreService
 from src.infra.decorators.logger import logging
 from src.repositories.chore_repository import ChoreRepository
 
 
 class CompleteChoreUseCase:
-    def __init__(self, chore_repository: ChoreRepository, get_chore_service: GetChoreService):
+    def __init__(self, chore_repository: ChoreRepository, get_chore_service: GetChoreService, recurring_chore_service: RecurringChoreService):
         self.chore_repository = chore_repository
         self.get_chore_service = get_chore_service
+        self.recurring_chore_service = recurring_chore_service
 
     @logging(show_args=True, show_return=True)
     def execute(self, chore_id: int, current_user: CurrentUserEntity) -> ChoreResponse:
@@ -25,6 +28,24 @@ class CompleteChoreUseCase:
             raise InternalError(code=InternalErrorCodes.COMPLETE_CHORE_ERROR.code())
 
     def __complete_chore(self, chore_id: int, current_user: CurrentUserEntity) -> ChoreResponse:
+        updated = self.__update_chore(chore_id, current_user)
+
+        if updated.is_recurring:
+            self.__handle_recurring_chore(chore_id, current_user, updated)
+
+        return ChoreResponse.from_entity(updated)
+
+    def __handle_recurring_chore(self, chore_id: int, current_user: CurrentUserEntity, updated: ChoreEntity):
+        recurring_dto = RecurringChoreDTO(
+            family_id=current_user.family_id,
+            chore_id=chore_id,
+            day_of_the_week_ids=updated.recurrence_day_ids,
+            is_recurring=updated.is_recurring,
+            is_chore_completed=True,
+        )
+        self.recurring_chore_service.execute(recurring_dto)
+
+    def __update_chore(self, chore_id: int, current_user: CurrentUserEntity) -> ChoreEntity:
         chore: ChoreEntity = self.get_chore_service.execute(
             chore_id=chore_id,
             family_id=current_user.family_id,
@@ -38,10 +59,14 @@ class CompleteChoreUseCase:
             points=chore.points,
             assigned_to_user_id=chore.assigned_to_user_id,
             completed=True,
+            is_recurring=chore.is_recurring,
         )
+
+        should_commit = chore.is_recurring is False
         updated: ChoreEntity = self.chore_repository.update(
             chore_id=chore_id,
             family_id=current_user.family_id,
             update_chore_dto=dto,
+            commit=should_commit,
         )
-        return ChoreResponse.from_entity(updated)
+        return updated

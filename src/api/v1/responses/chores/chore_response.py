@@ -11,6 +11,8 @@ class ChoreResponse(BaseModel):
     assigned_to: int | None = Field(None, examples=[2])
     created_by: int = Field(..., examples=[1])
     completed: bool = Field(..., examples=[False])
+    is_recurring: bool = Field(default=False, examples=[False])
+    recurrence_day_ids: list[int] = Field(default_factory=list, examples=[[1, 3, 5]])
 
     @staticmethod
     def from_entity(entity: ChoreEntity) -> "ChoreResponse":
@@ -22,4 +24,6 @@ class ChoreResponse(BaseModel):
             assigned_to=entity.assigned_to_user_id,
             created_by=entity.created_by_user_id,
             completed=entity.completed,
+            is_recurring=entity.is_recurring,
+            recurrence_day_ids=entity.recurrence_day_ids or [],
         )

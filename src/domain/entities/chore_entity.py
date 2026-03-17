@@ -16,6 +16,8 @@ class ChoreEntity:
         assigned_to_user_id: int | None,
         created_by_user_id: int,
         completed: bool,
+        is_recurring: bool = False,
+        recurrence_day_ids: list[int] | None = None,
     ):
         self.id = chore_id
         self.family_id = family_id
@@ -25,6 +27,8 @@ class ChoreEntity:
         self.assigned_to_user_id = assigned_to_user_id
         self.created_by_user_id = created_by_user_id
         self.completed = completed
+        self.is_recurring = is_recurring
+        self.recurrence_day_ids = recurrence_day_ids or []
 
 
     def validate_can_update_or_delete(self):

@@ -38,6 +38,7 @@ class AssignChoreToMeUseCase:
             points=chore.points,
             assigned_to_user_id=current_user.user_id,
             completed=chore.completed,
+            is_recurring=chore.is_recurring
         )
         updated: ChoreEntity = self.chore_repository.update(
             chore_id=chore_id,

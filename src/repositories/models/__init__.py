@@ -8,4 +8,6 @@ from .user_model import UserModel
 from .role_model import RoleModel
 from .family_model import FamilyModel
 from .chore_model import ChoreModel
+from .recurring_chore_model import RecurringChoreModel
+from .day_of_week_model import DayOfWeekModel
 from .refresh_token_model import RefreshTokenModel

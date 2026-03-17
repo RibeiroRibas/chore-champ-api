@@ -1,7 +1,5 @@
 from dataclasses import dataclass
 
-from src.domain.vo.phone import PhoneVO
-
 
 @dataclass
 class CreateChoreDTO:
@@ -12,3 +10,5 @@ class CreateChoreDTO:
     created_by_user_id: int
     assigned_to_user_id: int | None = None
     completed: bool = False
+    is_recurring: bool = False
+    recurrence_day_ids: list[int] | None = None

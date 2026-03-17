@@ -143,12 +143,14 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 - Pydantic `BaseModel` em `src/api/v1/requests/{recurso}/`.
 - Campos com `Field(..., examples=[...])` quando fizer sentido para a documentação.
 - Nome do ficheiro/classe: verbo ou contexto + Request (ex.: `CreateCurrentUserRequest`, `LoginRequest`).
+- **GET com mais de dois filtros:** quando um endpoint GET tiver mais de dois parâmetros de filtro (query), criar um modelo de request Pydantic (ex.: `GetChoresFilteredRequest`) para agrupar os filtros. Antes de chegar à camada de domínio (repositórios ou serviços), essa request deve ser convertida para um DTO da camada de aplicação (ex.: `GetChoresFilteredDto`). O endpoint recebe a request (via `Depends` com função que lê os query params), converte para DTO no handler e passa o DTO ao use case; o use case e o repositório recebem apenas o DTO.
 
 ### Responses
 
 - Pydantic `BaseModel` em `src/api/v1/responses/{recurso}/`.
 - Campos com `Field(..., examples=[...])`.
 - Se a resposta mapeia uma entidade, fornecer `@staticmethod def from_entity(entity: XEntity) -> 'XResponse'` que constrói o response a partir da entidade.
+- **Respostas paginadas:** usar uma classe base genérica `PaginatedResponse[T]` (ex.: em `src/api/v1/responses/paginated_response.py`) com campos `items: list[T]`, `total`, `page`, `page_size`. As respostas paginadas por recurso (ex.: `ChoresPaginatedResponse`) devem herdar de `PaginatedResponse[ItemResponse]` (ex.: `class ChoresPaginatedResponse(PaginatedResponse[ChoreResponse])`) em vez de duplicar os campos.
 
 ---
 
@@ -201,6 +203,7 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 - Em `src/application/schemas/`, com subpastas por recurso quando fizer sentido (ex.: `users/create_user_dto.py`, `auth/create_auth_dto.py`).
 - Usar `@dataclass` com campos tipados (ex.: `CreateUserDTO`, `UpdateUserDTO`, `CreateAuthDTO`).
 - Não usar Pydantic aqui; requests/responses da API é que são Pydantic.
+- **Paginação:** existe uma base genérica `PaginatedDto[T]` em `src/application/schemas/paginated_dto.py` com `items: list[T]`, `total`, `page`, `page_size`. DTOs de *resultado* de listagem paginada (ex.: `GetPaginatedChoresDto`) devem herdar de `PaginatedDto[Entity]` (ex.: `PaginatedDto[ChoreEntity]`). O repositório retorna esse DTO; o use case converte para o response da API.
 
 ### Use cases
 
@@ -238,6 +241,7 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 - Um ficheiro por agregado/entidade em `src/repositories/` (ex.: `user_repository.py` → `UserRepository`).
 - Construtor: `def __init__(self, db_session: Session)` e guardar em `self.db_session`.
 - Métodos de escrita (insert, update, delete) com parâmetro `commit: bool = True`; ao final, se `commit`, chamar `self.db_session.commit()`.
+- **O repositório nunca deve retornar `tuple`.** Para listas paginadas, o método deve retornar um DTO da camada de aplicação que herde de `PaginatedDto[T]` (ex.: `GetPaginatedChoresDto` que estende `PaginatedDto[ChoreEntity]` em `src/application/schemas/paginated_dto.py`). O DTO de resultado de paginação tem `items`, `total`, `page`, `page_size`; o use case recebe esse DTO e converte para o response da API.
 - **O repositório sempre deve retornar uma entidade do domínio e nunca o modelo do SQLAlchemy.** Usar DTOs da application na entrada (ex.: `CreateUserDTO`) e entidades na saída (ex.: `UserEntity | None`). Não expor models na API nem em use cases.
 - No máximo 3 parâmetros por método, criar DTO caso isso aconteça.
 - Em métodos de leitura, usar `model.to_entity() if model else None` (ou construir a entidade a partir do model). Em métodos que exigem existência (ex.: delete, update), lançar `NotFoundError` com o código apropriado quando não encontrar.
@@ -294,3 +298,9 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 | Model         | repositories/models/     | Base, __tablename__, to_entity(), from_entity() se necessário |
 
 Ao criar um novo recurso (ex.: "tasks"), seguir esta ordem: entidade → model + migration → repositório → DTOs → use cases → dependencies → requests/responses → error_docs → endpoints → registar router em router_v1.
+
+---
+
+## 14. Regra para formulários no app (Chore Champ App)
+
+Em páginas do app que contenham formulários com botão de envio (ex.: criar conta, login, esqueci senha), **o botão de envio deve ficar habilitado somente quando todos os campos estiverem preenchidos e todas as validações forem atendidas**. Não permitir enviar com campos vazios, formato inválido (ex.: e-mail com regex), tamanho mínimo (ex.: senha) ou comparações (ex.: confirmação de senha). Implementar com um getter computado (ex.: `_canSubmit`) que replica a lógica dos validadores dos campos; usar listeners nos controladores para chamar `setState` quando o texto mudar, e definir `onPressed` do botão como `(_loading || !_canSubmit) ? null : _handleSubmit`.

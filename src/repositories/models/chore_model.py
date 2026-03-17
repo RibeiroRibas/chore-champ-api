@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 from src.domain.entities.chore_entity import ChoreEntity
 from src.domain.entities.chore_user_entity import ChoreUserEntity
 from src.repositories.models import Base
+from src.repositories.models.recurring_chore_model import RecurringChoreModel
 
 
 class ChoreModel(Base):
@@ -17,6 +18,7 @@ class ChoreModel(Base):
     assigned_to_user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     created_by_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     completed = Column(Boolean, nullable=False, default=False)
+    is_recurring = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
@@ -32,6 +34,12 @@ class ChoreModel(Base):
         foreign_keys=[created_by_user_id],
         lazy="selectin",
     )
+    chore_days = relationship(
+        "RecurringChoreModel",
+        foreign_keys=[RecurringChoreModel.chore_id],
+        lazy="selectin",
+        cascade="all, delete-orphan",
+    )
 
     def to_entity(self) -> ChoreEntity:
         return ChoreEntity(
@@ -43,6 +51,8 @@ class ChoreModel(Base):
             assigned_to_user_id=self.assigned_to_user_id,
             created_by_user_id=self.created_by_user_id,
             completed=self.completed,
+            is_recurring=self.is_recurring,
+            recurrence_day_ids=[day.day_of_week.id for day in self.chore_days]
         )
 
     def to_chore_user_entity(self) -> ChoreUserEntity:

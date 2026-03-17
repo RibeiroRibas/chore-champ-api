@@ -5,7 +5,21 @@ from src.domain.errors.codes.not_found_error_codes import NotFoundErrorCodes
 from src.domain.errors.codes.unauthorized_error_codes import UnauthorizedErrorCodes
 
 
-list_chores = {
+list_today_chores = {
+    404: build_doc_errors_response(
+        [
+            NotFoundErrorCodes.CURRENT_USER_NOT_FOUND,
+        ]
+    ),
+    500: build_doc_errors_response(
+        [
+            InternalErrorCodes.LIST_CHORES_ERROR,
+        ]
+    ),
+}
+
+
+list_all_chores = {
     404: build_doc_errors_response(
         [
             NotFoundErrorCodes.CURRENT_USER_NOT_FOUND,
