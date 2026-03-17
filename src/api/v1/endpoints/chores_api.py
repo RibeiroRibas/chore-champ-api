@@ -43,7 +43,7 @@ router = APIRouter(prefix="/family/chores")
 
 
 @router.get(
-    "",
+    "/today",
     status_code=status.HTTP_200_OK,
     response_model=list[ChoreResponse],
     responses=chores_error_docs.list_today_chores,

@@ -18,6 +18,7 @@ class ChoreModel(Base):
     assigned_to_user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
     created_by_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     completed = Column(Boolean, nullable=False, default=False)
+    completed_at = Column(DateTime, nullable=True)
     is_recurring = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())

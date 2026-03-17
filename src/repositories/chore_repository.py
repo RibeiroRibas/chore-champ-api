@@ -1,3 +1,6 @@
+from datetime import datetime, timezone
+
+from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session
 
 from src.application.schemas.chores.create_chore_dto import CreateChoreDTO
@@ -40,15 +43,24 @@ class ChoreRepository:
         return model.to_entity()
 
 
-    def find_by_family_id(self, family_id: int, limit: int = 30) -> list[ChoreEntity]:
-        models: list[ChoreModel] | None = (
+    def find_today_chore_by_family_id(self, family_id: int, limit: int = 30) -> list[ChoreEntity]:
+        query = (
             self.db_session.query(ChoreModel)
             .filter_by(family_id=family_id)
+            .filter(
+                or_(
+                    ChoreModel.completed.is_(False),
+                    and_(
+                        ChoreModel.completed.is_(True),
+                        func.date(ChoreModel.completed_at) == func.current_date(),
+                    ),
+                )
+            )
             .order_by(ChoreModel.created_at.desc())
             .limit(limit)
-            .all()
         )
-        return [m.to_entity() for m in models] if models else []
+        models: list[ChoreModel] = query.all()
+        return [m.to_entity() for m in models]
 
     def find_paginated(
         self,
@@ -99,6 +111,9 @@ class ChoreRepository:
         model.points = update_chore_dto.points
         model.assigned_to_user_id = update_chore_dto.assigned_to_user_id
         model.completed = update_chore_dto.completed
+        model.completed_at = (
+            datetime.now(timezone.utc) if update_chore_dto.completed else None
+        )
         model.is_recurring = update_chore_dto.is_recurring
 
         self.db_session.merge(model)

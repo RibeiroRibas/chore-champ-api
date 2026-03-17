@@ -30,7 +30,7 @@ class ListTodayChoresUseCase:
             raise InternalError(code=InternalErrorCodes.LIST_CHORES_ERROR.code())
 
     def __list_today_chores(self, family_id: int) -> list[ChoreResponse]:
-        chores = self.chore_repository.find_by_family_id(family_id)
+        chores = self.chore_repository.find_today_chore_by_family_id(family_id)
 
         non_recurring = [e for e in chores if not e.is_recurring]
         recurring = [e for e in chores if e.is_recurring]
