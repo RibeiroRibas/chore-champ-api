@@ -7,6 +7,7 @@ from src.application.usecases.family.create_family_member_use_case import Create
 from src.application.usecases.family.delete_family_member_use_case import DeleteFamilyMemberUseCase
 from src.application.usecases.family.get_family_member_use_case import GetFamilyMemberUseCase
 from src.application.usecases.users.has_permission_use_case import HasPermissionUseCase
+from src.application.usecases.family.get_family_ranking_use_case import GetFamilyRankingUseCase
 from src.application.usecases.family.list_family_members_use_case import ListFamilyMembersUseCase
 from src.application.usecases.family.resend_family_member_password_use_case import (
     ResendFamilyMemberPasswordUseCase,
@@ -27,6 +28,10 @@ from src.repositories.user_repository import UserRepository
 
 def list_family_members_use_case(db: Session = Depends(get_db)) -> ListFamilyMembersUseCase:
     return ListFamilyMembersUseCase(family_repository=FamilyRepository(db_session=db))
+
+
+def get_family_ranking_use_case(db: Session = Depends(get_db)) -> GetFamilyRankingUseCase:
+    return GetFamilyRankingUseCase(user_repository=UserRepository(db_session=db))
 
 
 def create_family_member_use_case(db: Session = Depends(get_db)) -> CreateFamilyMemberUseCase:

@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from src.application.schemas.users.create_user_dto import CreateUserDTO
 from src.application.schemas.users.update_user_dto import UpdateUserDTO
 from src.domain.entities.current_user_entity import CurrentUserEntity
+from src.domain.entities.family_member_ranking_entity import FamilyMemberRankingEntity
 from src.domain.entities.user_auth_family_entity import UserAuthFamilyEntity
 from src.domain.entities.user_entity import UserEntity
 from src.domain.entities.user_family_entity import UserFamilyEntity
@@ -61,6 +62,33 @@ class UserRepository:
     def find_by_family_id(self, family_id: int) -> list[UserEntity]:
         models: list[UserModel] | None = self.db_session.query(UserModel).filter_by(family_id=family_id).all()
         return [m.to_entity() for m in models] if models else []
+
+    def find_ranking_by_family_id(self, family_id: int) -> list[FamilyMemberRankingEntity]:
+        models: list[UserModel] | None = (
+            self.db_session.query(UserModel)
+            .filter_by(family_id=family_id)
+            .all()
+        )
+        if not models:
+            return []
+        result: list[FamilyMemberRankingEntity] = []
+        for m in models:
+            points = (
+                m.user_points.to_entity().available_points()
+                if m.user_points
+                else 0
+            )
+            result.append(
+                FamilyMemberRankingEntity(
+                    id=m.id,
+                    name=m.name,
+                    points=points,
+                    role_name=m.role.name,
+                    avatar=m.avatar or "👤",
+                )
+            )
+        result.sort(key=lambda e: e.points, reverse=True)
+        return result
 
     def delete_by_id(self, user_id: int, commit: bool = True) -> None:
         self.db_session.query(UserModel).filter_by(id=user_id).delete()

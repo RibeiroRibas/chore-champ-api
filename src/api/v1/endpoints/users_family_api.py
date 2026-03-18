@@ -3,17 +3,25 @@ from typing import Annotated
 from fastapi import BackgroundTasks, Depends, APIRouter
 from starlette import status
 
-from src.api.v1.dependencies.family_members_dependencies import list_family_members_use_case, \
-    create_family_member_use_case, get_family_member_use_case, update_family_member_use_case, \
-    delete_family_member_use_case, resend_family_member_password_use_case
+from src.api.v1.dependencies.family_members_dependencies import (
+    create_family_member_use_case,
+    delete_family_member_use_case,
+    get_family_member_use_case,
+    get_family_ranking_use_case,
+    list_family_members_use_case,
+    resend_family_member_password_use_case,
+    update_family_member_use_case,
+)
 from src.api.v1.dependencies.shared_dependencies import has_permission_admin_use_case, get_current_user_entity
 from src.api.v1.docs.errors import family_members_error_docs
 from src.api.v1.requests.users.create_family_member_request import CreateFamilyMemberRequest
 from src.api.v1.requests.users.update_family_member_request import UpdateFamilyMemberRequest
+from src.api.v1.responses.users.family_member_ranking_response import FamilyMemberRankingResponse
 from src.api.v1.responses.users.family_member_response import FamilyMemberResponse
 from src.application.usecases.family.create_family_member_use_case import CreateFamilyMemberUseCase
 from src.application.usecases.family.delete_family_member_use_case import DeleteFamilyMemberUseCase
 from src.application.usecases.family.get_family_member_use_case import GetFamilyMemberUseCase
+from src.application.usecases.family.get_family_ranking_use_case import GetFamilyRankingUseCase
 from src.application.usecases.family.list_family_members_use_case import ListFamilyMembersUseCase
 from src.application.usecases.family.resend_family_member_password_use_case import (
     ResendFamilyMemberPasswordUseCase,
@@ -45,6 +53,20 @@ def list_family_members(
     user: Annotated[CurrentUserEntity, Depends(get_current_user_entity)],
     use_case: Annotated[ListFamilyMembersUseCase, Depends(list_family_members_use_case)],
 ) -> list[FamilyMemberResponse]:
+    return use_case.execute(family_id=user.family_id)
+
+
+@router.get(
+    "/ranking",
+    status_code=status.HTTP_200_OK,
+    response_model=list[FamilyMemberRankingResponse],
+    responses=family_members_error_docs.get_family_ranking,
+)
+@request_logging
+def get_family_ranking(
+    user: Annotated[CurrentUserEntity, Depends(get_current_user_entity)],
+    use_case: Annotated[GetFamilyRankingUseCase, Depends(get_family_ranking_use_case)],
+) -> list[FamilyMemberRankingResponse]:
     return use_case.execute(family_id=user.family_id)
 
 

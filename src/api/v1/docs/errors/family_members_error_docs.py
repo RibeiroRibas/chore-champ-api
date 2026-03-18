@@ -127,3 +127,16 @@ resend_family_member_password = {
         ]
     ),
 }
+
+get_family_ranking = {
+    404: build_doc_errors_response(
+        [
+            NotFoundErrorCodes.CURRENT_USER_NOT_FOUND,
+        ]
+    ),
+    500: build_doc_errors_response(
+        [
+            InternalErrorCodes.GET_FAMILY_RANKING_ERROR,
+        ]
+    ),
+}
