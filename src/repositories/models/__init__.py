@@ -11,3 +11,4 @@ from .chore_model import ChoreModel
 from .recurring_chore_model import RecurringChoreModel
 from .day_of_week_model import DayOfWeekModel
 from .refresh_token_model import RefreshTokenModel
+from .user_points_model import UserPointsModel

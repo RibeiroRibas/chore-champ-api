@@ -6,6 +6,7 @@ from src.domain.entities.current_user_entity import CurrentUserEntity
 from src.domain.entities.user_auth_family_entity import UserAuthFamilyEntity
 from src.domain.entities.user_entity import UserEntity
 from src.domain.entities.user_family_entity import UserFamilyEntity
+from src.domain.entities.user_points_family_entity import UserPointsFamilyEntity
 from src.domain.errors.codes.not_found_error_codes import NotFoundErrorCodes
 from src.domain.errors.not_found_error import NotFoundError
 from src.repositories.models.user_model import UserModel
@@ -37,9 +38,13 @@ class UserRepository:
         model: UserModel | None = self.db_session.query(UserModel).filter_by(auth_id=auth_id).first()
         return model.to_current_user_entity() if model else None
 
-    def find_by_auth_id_with_family(self, auth_id: int) -> UserFamilyEntity | None:
-        model: UserModel | None = self.db_session.query(UserModel).filter_by(auth_id=auth_id).first()
-        return model.to_user_family_entity() if model else None
+    def find_by_auth_id_with_family_and_points(
+        self, auth_id: int
+    ) -> UserPointsFamilyEntity | None:
+        model: UserModel | None = (
+            self.db_session.query(UserModel).filter_by(auth_id=auth_id).first()
+        )
+        return model.to_user_points_family_entity() if model else None
 
     def find_by_id(self, user_id: int) -> UserEntity | None:
         model: UserModel | None = self.db_session.query(UserModel).filter_by(id=user_id).first()

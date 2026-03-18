@@ -1,5 +1,6 @@
 from src.api.v1.responses.chores.chore_response import ChoreResponse
 from src.application.schemas.chores.update_chore_dto import UpdateChoreDTO
+from src.application.schemas.users.add_user_points_dto import AddUserPointsDTO
 from src.domain.entities.chore_entity import ChoreEntity
 from src.domain.entities.current_user_entity import CurrentUserEntity
 from src.domain.errors.base_error import BaseError
@@ -8,15 +9,23 @@ from src.domain.errors.internal_error import InternalError
 from src.domain.schemas.recurring_chore_dto import RecurringChoreDTO
 from src.domain.services.get_chore_service import GetChoreService
 from src.domain.services.recurring_chore_service import RecurringChoreService
+from src.domain.services.save_user_points_service import SaveUserPointsService
 from src.infra.decorators.logger import logging
 from src.repositories.chore_repository import ChoreRepository
 
 
 class CompleteChoreUseCase:
-    def __init__(self, chore_repository: ChoreRepository, get_chore_service: GetChoreService, recurring_chore_service: RecurringChoreService):
+    def __init__(
+        self,
+        chore_repository: ChoreRepository,
+        get_chore_service: GetChoreService,
+        recurring_chore_service: RecurringChoreService,
+        save_user_points_service: SaveUserPointsService,
+    ):
         self.chore_repository = chore_repository
         self.get_chore_service = get_chore_service
         self.recurring_chore_service = recurring_chore_service
+        self.save_user_points_service = save_user_points_service
 
     @logging(show_args=True, show_return=True)
     def execute(self, chore_id: int, current_user: CurrentUserEntity) -> ChoreResponse:
@@ -28,12 +37,32 @@ class CompleteChoreUseCase:
             raise InternalError(code=InternalErrorCodes.COMPLETE_CHORE_ERROR.code())
 
     def __complete_chore(self, chore_id: int, current_user: CurrentUserEntity) -> ChoreResponse:
-        updated = self.__update_chore(chore_id, current_user)
+        chore = self.__get_chore_by_id(chore_id, current_user)
+        chore.validate_can_complete(current_user=current_user)
+        self.__save_user_points(chore, current_user)
 
-        if updated.is_recurring:
-            self.__handle_recurring_chore(chore_id, current_user, updated)
+        if chore.is_recurring:
+            self.__handle_recurring_chore(chore_id, current_user, chore)
+
+        updated: ChoreEntity = self.__update_chore(chore, current_user)
 
         return ChoreResponse.from_entity(updated)
+
+    def __get_chore_by_id(self, chore_id: int, current_user: CurrentUserEntity) -> ChoreEntity:
+        chore: ChoreEntity = self.get_chore_service.execute(
+            chore_id=chore_id,
+            family_id=current_user.family_id,
+        )
+
+        return chore
+
+    def __save_user_points(self, chore: ChoreEntity, current_user: CurrentUserEntity):
+        points_dto = AddUserPointsDTO(
+            user_id=chore.assigned_to_user_id,
+            points=chore.points,
+            family_id=current_user.family_id,
+        )
+        self.save_user_points_service.execute(dto=points_dto)
 
     def __handle_recurring_chore(self, chore_id: int, current_user: CurrentUserEntity, updated: ChoreEntity):
         recurring_dto = RecurringChoreDTO(
@@ -45,14 +74,7 @@ class CompleteChoreUseCase:
         )
         self.recurring_chore_service.execute(recurring_dto)
 
-    def __update_chore(self, chore_id: int, current_user: CurrentUserEntity) -> ChoreEntity:
-        chore: ChoreEntity = self.get_chore_service.execute(
-            chore_id=chore_id,
-            family_id=current_user.family_id,
-        )
-
-        chore.validate_can_complete(current_user=current_user)
-
+    def __update_chore(self, chore: ChoreEntity, current_user: CurrentUserEntity) -> ChoreEntity:
         dto = UpdateChoreDTO(
             title=chore.title,
             emoji=chore.emoji,
@@ -62,11 +84,9 @@ class CompleteChoreUseCase:
             is_recurring=chore.is_recurring,
         )
 
-        should_commit = chore.is_recurring is False
         updated: ChoreEntity = self.chore_repository.update(
-            chore_id=chore_id,
+            chore_id=chore.id,
             family_id=current_user.family_id,
             update_chore_dto=dto,
-            commit=should_commit,
         )
         return updated

@@ -7,6 +7,7 @@ from src.domain.entities.current_user_entity import CurrentUserEntity
 from src.domain.entities.user_auth_family_entity import UserAuthFamilyEntity
 from src.domain.entities.user_entity import UserEntity
 from src.domain.entities.user_family_entity import UserFamilyEntity
+from src.domain.entities.user_points_family_entity import UserPointsFamilyEntity
 from src.repositories.models import Base
 
 from src.repositories.models.chore_model import ChoreModel
@@ -34,6 +35,12 @@ class UserModel(Base):
         back_populates="assigned_to_user",
         lazy="selectin",
     )
+    user_points = relationship(
+        "UserPointsModel",
+        back_populates="user",
+        uselist=False,
+        lazy="selectin",
+    )
 
     def to_entity(self) -> UserEntity:
         return UserEntity(
@@ -45,10 +52,17 @@ class UserModel(Base):
             avatar=self.avatar,
         )
 
-    def to_user_family_entity(self):
+    def to_user_family_entity(self) -> UserFamilyEntity:
         return UserFamilyEntity(
             user_entity=self.to_entity(),
             family=self.family.to_entity(),
+        )
+
+    def to_user_points_family_entity(self) -> UserPointsFamilyEntity:
+        return UserPointsFamilyEntity(
+            user=self.to_entity(),
+            family=self.family.to_entity(),
+            user_points=self.user_points.to_entity() if self.user_points else None,
         )
 
     def to_current_user_entity(self):

@@ -9,3 +9,4 @@ class NotFoundErrorCodes(BaseErrorCode):
     FAMILY_NOT_FOUND = (404304, "Family not found")
     CHORE_NOT_FOUND = (404305, "Chore not found")
     CURRENT_USER_NOT_FOUND = (404306, "Current user not found")
+    USER_POINTS_NOT_FOUND = (404307, "User points not found")

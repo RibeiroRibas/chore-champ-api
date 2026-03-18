@@ -66,6 +66,9 @@ class ChoreEntity:
         if self.completed:
             raise BadRequestError(code=BadRequestErrorCode.CHORE_ALREADY_COMPLETED.code())
 
+        if self.completed and self.assigned_to_user_id is None:
+            raise BadRequestError(code=BadRequestErrorCode.ASSIGNED_TO_USER_ID_REQUIRED.code())
+
         if not current_user.is_admin():
             if self.assigned_to_user_id is None or self.assigned_to_user_id != current_user.user_id:
                 raise BadRequestError(code=BadRequestErrorCode.CHORE_CANNOT_COMPLETE.code())

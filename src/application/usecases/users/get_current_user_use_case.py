@@ -1,6 +1,5 @@
 from src.api.v1.responses.users.current_user_response import CurrentUserResponse
-from src.domain.entities.user_entity import UserEntity
-from src.domain.entities.user_family_entity import UserFamilyEntity
+from src.domain.entities.user_points_family_entity import UserPointsFamilyEntity
 from src.domain.errors.base_error import BaseError
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.codes.not_found_error_codes import NotFoundErrorCodes
@@ -24,9 +23,11 @@ class GetCurrentUserUseCase:
             raise InternalError(code=InternalErrorCodes.GET_CURRENT_USER_ERROR.code())
 
     def __get_current_user(self, auth_id: int) -> CurrentUserResponse:
-        user: UserFamilyEntity | None = self.user_repository.find_by_auth_id_with_family(auth_id)
+        entity: UserPointsFamilyEntity | None = (
+            self.user_repository.find_by_auth_id_with_family_and_points(auth_id)
+        )
 
-        if user is None:
+        if entity is None:
             raise NotFoundError(code=NotFoundErrorCodes.USER_NOT_FOUND.code())
 
-        return CurrentUserResponse.from_entity(entity=user)
+        return CurrentUserResponse.from_entity(entity=entity)

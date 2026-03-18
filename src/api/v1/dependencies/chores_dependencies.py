@@ -13,9 +13,11 @@ from src.application.usecases.chores.update_chore_use_case import UpdateChoreUse
 from src.domain.services.get_chore_service import GetChoreService
 from src.domain.services.get_chore_user_service import GetChoreUSerService
 from src.domain.services.recurring_chore_service import RecurringChoreService
+from src.domain.services.save_user_points_service import SaveUserPointsService
 from src.infra.database.database import get_db
 from src.repositories.chore_repository import ChoreRepository
 from src.repositories.recurring_chore_repository import RecurringChoreRepository
+from src.repositories.user_points_repository import UserPointsRepository
 
 
 def list_today_chores_use_case(db: Session = Depends(get_db)) -> ListTodayChoresUseCase:
@@ -49,10 +51,14 @@ def update_chore_use_case(db: Session = Depends(get_db)) -> UpdateChoreUseCase:
         chore_repository=chore_repository,
         recurring_chore_repository=recurring_chore_repository,
     )
+    save_user_points_service = SaveUserPointsService(
+        user_points_repository=UserPointsRepository(db_session=db),
+    )
     return UpdateChoreUseCase(
         chore_repository=chore_repository,
         get_chore_service=GetChoreService(chore_repository=chore_repository),
         recurring_chore_service=recurring_chore_service,
+        save_user_points_service=save_user_points_service,
     )
 
 
@@ -87,8 +93,12 @@ def complete_chore_use_case(db: Session = Depends(get_db)) -> CompleteChoreUseCa
         chore_repository=chore_repository,
         recurring_chore_repository=recurring_chore_repository,
     )
+    save_user_points_service = SaveUserPointsService(
+        user_points_repository=UserPointsRepository(db_session=db),
+    )
     return CompleteChoreUseCase(
         chore_repository=chore_repository,
         get_chore_service=GetChoreService(chore_repository=chore_repository),
         recurring_chore_service=recurring_chore_service,
+        save_user_points_service=save_user_points_service,
     )

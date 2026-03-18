@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 
 from src.api.v1.responses.families.family_response import FamilyResponse
 from src.api.v1.responses.roles.role_response import RoleResponse
-from src.domain.entities.user_family_entity import UserFamilyEntity
+from src.domain.entities.user_points_family_entity import UserPointsFamilyEntity
 
 
 class CurrentUserResponse(BaseModel):
@@ -18,9 +18,10 @@ class CurrentUserResponse(BaseModel):
         ...,
         examples=[{"id": 1, "name": "Família Silva"}],
     )
+    available_points: int = Field(..., examples=[0, 150], description="total_points - points_redeemed")
 
     @staticmethod
-    def from_entity(entity: UserFamilyEntity) -> "CurrentUserResponse":
+    def from_entity(entity: UserPointsFamilyEntity) -> "CurrentUserResponse":
         return CurrentUserResponse(
             id=entity.user.id,
             name=entity.user.name,
@@ -28,4 +29,5 @@ class CurrentUserResponse(BaseModel):
             role=RoleResponse.from_entity(entity.user.role),
             phone_number=entity.user.phone.formatted(),
             family=FamilyResponse.from_entity(entity.family),
+            available_points=entity.available_points(),
         )
