@@ -31,17 +31,28 @@ class CreateChoreUseCase:
     @logging(show_args=True, show_return=True)
     def execute(self, request: CreateChoreRequest, current_user: CurrentUserEntity) -> ChoreResponse:
         try:
-            return self.__create_chore(request, current_user)
+            return self.__process_create_chore(request, current_user)
         except Exception as error:
             if isinstance(error, BaseError):
                 raise error
             raise InternalError(code=InternalErrorCodes.CREATE_CHORE_ERROR.code())
 
-    def __create_chore(self, request: CreateChoreRequest, current_user: CurrentUserEntity) -> ChoreResponse:
-
+    def __process_create_chore(self, request: CreateChoreRequest, current_user: CurrentUserEntity) -> ChoreResponse:
         if request.is_recurring and (request.recurrence_day_ids is None or len(request.recurrence_day_ids) == 0):
             raise BadRequestError(code=BadRequestErrorCode.RECURRENCE_DAY_IDS_REQUIRED.code())
 
+        entity = self.__create_chore(current_user, request)
+
+        if request.is_recurring:
+            should_commit = request.completed is False
+            self.create_recurring_chore(current_user, entity, request, should_commit)
+
+        if request.completed:
+            self.__update_points(current_user, request)
+
+        return ChoreResponse.from_entity(entity)
+
+    def __create_chore(self, current_user: CurrentUserEntity, request: CreateChoreRequest) -> ChoreEntity:
         dto = CreateChoreDTO(
             family_id=current_user.family_id,
             title=request.title,
@@ -56,15 +67,7 @@ class CreateChoreUseCase:
 
         should_commit = request.is_recurring is False or request.completed is False
         entity: ChoreEntity = self.chore_repository.insert(create_chore_dto=dto, commit=should_commit)
-
-        if request.is_recurring:
-            should_commit = request.completed is False
-            self.create_recurring_chore(current_user, entity, request, should_commit)
-
-        if request.completed:
-            self.__update_points(current_user, request)
-
-        return ChoreResponse.from_entity(entity)
+        return entity
 
     def __update_points(self, current_user: CurrentUserEntity, request: CreateChoreRequest):
         points_dto = AddUserPointsDTO(
