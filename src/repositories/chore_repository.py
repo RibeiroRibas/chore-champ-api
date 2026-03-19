@@ -31,6 +31,7 @@ class ChoreRepository:
             assigned_to_user_id=create_chore_dto.assigned_to_user_id,
             created_by_user_id=create_chore_dto.created_by_user_id,
             completed=create_chore_dto.completed,
+            completed_at=datetime.now(timezone.utc) if create_chore_dto.completed else None,
             is_recurring=create_chore_dto.is_recurring,
         )
         self.db_session.add(model)

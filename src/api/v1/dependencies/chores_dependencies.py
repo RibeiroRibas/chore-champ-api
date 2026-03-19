@@ -36,9 +36,13 @@ def list_all_chores_use_case(db: Session = Depends(get_db)) -> ListAllChoresUseC
 def create_chore_use_case(db: Session = Depends(get_db)) -> CreateChoreUseCase:
     chore_repository = ChoreRepository(db_session=db)
     recurring_chore_repository = RecurringChoreRepository(db_session=db)
+    save_user_points_service = SaveUserPointsService(
+        user_points_repository=UserPointsRepository(db_session=db),
+    )
     return CreateChoreUseCase(
         chore_repository=chore_repository,
         recurring_chore_repository=recurring_chore_repository,
+        save_user_points_service=save_user_points_service,
     )
 
 
@@ -55,8 +59,6 @@ def update_chore_use_case(db: Session = Depends(get_db)) -> UpdateChoreUseCase:
     )
     save_user_points_service = SaveUserPointsService(
         user_points_repository=UserPointsRepository(db_session=db),
-        achievement_repository=AchievementRepository(db_session=db),
-        user_achievement_repository=UserAchievementRepository(db_session=db),
     )
     return UpdateChoreUseCase(
         chore_repository=chore_repository,
@@ -99,8 +101,6 @@ def complete_chore_use_case(db: Session = Depends(get_db)) -> CompleteChoreUseCa
     )
     save_user_points_service = SaveUserPointsService(
         user_points_repository=UserPointsRepository(db_session=db),
-        achievement_repository=AchievementRepository(db_session=db),
-        user_achievement_repository=UserAchievementRepository(db_session=db),
     )
     return CompleteChoreUseCase(
         chore_repository=chore_repository,
