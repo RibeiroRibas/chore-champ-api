@@ -17,7 +17,9 @@ from src.domain.services.save_user_points_service import SaveUserPointsService
 from src.infra.database.database import get_db
 from src.repositories.chore_repository import ChoreRepository
 from src.repositories.recurring_chore_repository import RecurringChoreRepository
+from src.repositories.achievement_repository import AchievementRepository
 from src.repositories.user_points_repository import UserPointsRepository
+from src.repositories.user_achievement_repository import UserAchievementRepository
 
 
 def list_today_chores_use_case(db: Session = Depends(get_db)) -> ListTodayChoresUseCase:
@@ -53,6 +55,8 @@ def update_chore_use_case(db: Session = Depends(get_db)) -> UpdateChoreUseCase:
     )
     save_user_points_service = SaveUserPointsService(
         user_points_repository=UserPointsRepository(db_session=db),
+        achievement_repository=AchievementRepository(db_session=db),
+        user_achievement_repository=UserAchievementRepository(db_session=db),
     )
     return UpdateChoreUseCase(
         chore_repository=chore_repository,
@@ -95,6 +99,8 @@ def complete_chore_use_case(db: Session = Depends(get_db)) -> CompleteChoreUseCa
     )
     save_user_points_service = SaveUserPointsService(
         user_points_repository=UserPointsRepository(db_session=db),
+        achievement_repository=AchievementRepository(db_session=db),
+        user_achievement_repository=UserAchievementRepository(db_session=db),
     )
     return CompleteChoreUseCase(
         chore_repository=chore_repository,

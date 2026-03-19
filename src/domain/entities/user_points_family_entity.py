@@ -1,6 +1,6 @@
 from src.domain.entities.family_entity import FamilyEntity
 from src.domain.entities.user_entity import UserEntity
-from src.domain.entities.user_points_entity import UserPointsEntity
+from src.domain.entities.points_entity import PointsEntity
 
 
 class UserPointsFamilyEntity:
@@ -8,11 +8,11 @@ class UserPointsFamilyEntity:
         self,
         user: UserEntity,
         family: FamilyEntity,
-        user_points: UserPointsEntity | None,
+        points: PointsEntity | None,
     ):
         self.user = user
         self.family = family
-        self.user_points = user_points
+        self.points = points
 
     def available_points(self) -> int:
-        return self.user_points.available_points() if self.user_points else 0
+        return self.points.available_points() if self.points else 0

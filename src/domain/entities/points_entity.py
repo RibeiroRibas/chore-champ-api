@@ -1,4 +1,4 @@
-class UserPointsEntity:
+class PointsEntity:
     def __init__(
         self,
         id: int,

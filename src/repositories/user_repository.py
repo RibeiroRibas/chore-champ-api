@@ -7,6 +7,7 @@ from src.domain.entities.family_member_ranking_entity import FamilyMemberRanking
 from src.domain.entities.user_auth_family_entity import UserAuthFamilyEntity
 from src.domain.entities.user_entity import UserEntity
 from src.domain.entities.user_family_entity import UserFamilyEntity
+from src.domain.entities.user_points_achievements_entity import UserPointsAchievementsEntity
 from src.domain.entities.user_points_family_entity import UserPointsFamilyEntity
 from src.domain.errors.codes.not_found_error_codes import NotFoundErrorCodes
 from src.domain.errors.not_found_error import NotFoundError
@@ -59,9 +60,9 @@ class UserRepository:
         model: UserModel | None = self.db_session.query(UserModel).filter_by(id=user_id).first()
         return model.to_user_auth_family_entity() if model else None
 
-    def find_by_family_id(self, family_id: int) -> list[UserEntity]:
-        models: list[UserModel] | None = self.db_session.query(UserModel).filter_by(family_id=family_id).all()
-        return [m.to_entity() for m in models] if models else []
+    def find_user_points_achievements(self, user_id: int) -> UserPointsAchievementsEntity | None:
+        model: UserModel | None = self.db_session.query(UserModel).filter_by(id=user_id).first()
+        return model.to_user_points_achievements() if model else None
 
     def find_ranking_by_family_id(self, family_id: int) -> list[FamilyMemberRankingEntity]:
         models: list[UserModel] | None = (

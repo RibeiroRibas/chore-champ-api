@@ -33,4 +33,5 @@ class InternalErrorCodes(BaseErrorCode):
     COMPLETE_CHORE_ERROR = (500329, "Complete chore operation error")
     LIST_DAYS_OF_WEEK_ERROR = (500330, "List days of week operation error")
     SAVE_USER_POINTS_ERROR = (500331, "Save user points operation error")
+    GET_FAMILY_ACHIEVEMENTS_ERROR = (500332, "Get family achievements operation error")
     GET_FAMILY_RANKING_ERROR = (500332, "Get family ranking operation error")

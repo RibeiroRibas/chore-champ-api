@@ -7,10 +7,12 @@ from src.domain.entities.current_user_entity import CurrentUserEntity
 from src.domain.entities.user_auth_family_entity import UserAuthFamilyEntity
 from src.domain.entities.user_entity import UserEntity
 from src.domain.entities.user_family_entity import UserFamilyEntity
+from src.domain.entities.user_points_achievements_entity import UserPointsAchievementsEntity
 from src.domain.entities.user_points_family_entity import UserPointsFamilyEntity
 from src.repositories.models import Base
 
 from src.repositories.models.chore_model import ChoreModel
+from src.repositories.models.user_achievement_model import UserAchievementModel
 
 
 class UserModel(Base):
@@ -37,8 +39,12 @@ class UserModel(Base):
     )
     user_points = relationship(
         "UserPointsModel",
-        back_populates="user",
         uselist=False,
+        lazy="selectin",
+    )
+    achievements: Mapped[List["UserAchievementModel"]] = relationship(
+        "UserAchievementModel",
+        foreign_keys=[UserAchievementModel.user_id],
         lazy="selectin",
     )
 
@@ -62,10 +68,10 @@ class UserModel(Base):
         return UserPointsFamilyEntity(
             user=self.to_entity(),
             family=self.family.to_entity(),
-            user_points=self.user_points.to_entity() if self.user_points else None,
+            points=self.user_points.to_entity() if self.user_points else None,
         )
 
-    def to_current_user_entity(self):
+    def to_current_user_entity(self) ->CurrentUserEntity:
         return CurrentUserEntity(
             user_id=self.id,
             auth_id=self.auth_id,
@@ -73,9 +79,16 @@ class UserModel(Base):
             family_id=self.family_id
         )
 
-    def to_user_auth_family_entity(self):
+    def to_user_auth_family_entity(self)-> UserAuthFamilyEntity:
         return UserAuthFamilyEntity(
             user_entity=self.to_entity(),
             family=self.family.to_entity(),
             auth_entity=self.auth.to_entity(),
+        )
+
+    def to_user_points_achievements(self)-> UserPointsAchievementsEntity:
+        return UserPointsAchievementsEntity(
+            user=self.to_entity(),
+            points=self.user_points.to_entity() if self.user_points else None,
+            achievements=[achievement.to_achievement_entity() for achievement in self.achievements] if self.achievements else None
         )

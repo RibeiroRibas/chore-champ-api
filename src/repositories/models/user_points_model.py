@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Integer, ForeignKey
-from sqlalchemy.orm import relationship
 
-from src.domain.entities.user_points_entity import UserPointsEntity
+from src.domain.entities.points_entity import PointsEntity
 from src.repositories.models import Base
 
 
@@ -14,14 +13,8 @@ class UserPointsModel(Base):
     points_redeemed = Column(Integer, nullable=False, default=0)
     family_id = Column(Integer, ForeignKey("families.id"), nullable=False)
 
-    user = relationship(
-        "UserModel",
-        back_populates="user_points",
-        uselist=False,
-    )
-
-    def to_entity(self) -> UserPointsEntity:
-        return UserPointsEntity(
+    def to_entity(self) -> PointsEntity:
+        return PointsEntity(
             id=self.id,
             total_points=self.total_points,
             user_id=self.user_id,

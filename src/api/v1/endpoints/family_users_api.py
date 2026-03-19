@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import BackgroundTasks, Depends, APIRouter
 from starlette import status
 
+from src.api.v1.dependencies.achievements_dependencies import get_family_achievements_use_case
 from src.api.v1.dependencies.family_members_dependencies import (
     create_family_member_use_case,
     delete_family_member_use_case,
@@ -14,10 +15,13 @@ from src.api.v1.dependencies.family_members_dependencies import (
 )
 from src.api.v1.dependencies.shared_dependencies import has_permission_admin_use_case, get_current_user_entity
 from src.api.v1.docs.errors import family_members_error_docs
+from src.api.v1.docs.errors.achievements_error_docs import get_family_achievements
 from src.api.v1.requests.users.create_family_member_request import CreateFamilyMemberRequest
 from src.api.v1.requests.users.update_family_member_request import UpdateFamilyMemberRequest
+from src.api.v1.responses.achievements.achievement_response import AchievementResponse
 from src.api.v1.responses.users.family_member_ranking_response import FamilyMemberRankingResponse
 from src.api.v1.responses.users.family_member_response import FamilyMemberResponse
+from src.application.usecases.achievements.get_family_achievements_use_case import GetFamilyAchievementsUseCase
 from src.application.usecases.family.create_family_member_use_case import CreateFamilyMemberUseCase
 from src.application.usecases.family.delete_family_member_use_case import DeleteFamilyMemberUseCase
 from src.application.usecases.family.get_family_member_use_case import GetFamilyMemberUseCase
@@ -162,3 +166,18 @@ def resend_family_member_password(
         family_id=user.family_id,
         send_email_async=send_later,
     )
+
+@router.get(
+    "/achievements",
+    status_code=status.HTTP_200_OK,
+    response_model=list[AchievementResponse],
+    responses=get_family_achievements,
+)
+@request_logging
+def get_family_achievements_endpoint(
+    user: Annotated[CurrentUserEntity, Depends(get_current_user_entity)],
+    use_case: Annotated[
+        GetFamilyAchievementsUseCase, Depends(get_family_achievements_use_case)
+    ],
+) -> list[AchievementResponse]:
+    return use_case.execute(user_id=user.user_id)
