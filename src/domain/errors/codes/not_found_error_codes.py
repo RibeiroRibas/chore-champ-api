@@ -10,3 +10,5 @@ class NotFoundErrorCodes(BaseErrorCode):
     CHORE_NOT_FOUND = (404305, "Chore not found")
     CURRENT_USER_NOT_FOUND = (404306, "Current user not found")
     USER_POINTS_NOT_FOUND = (404307, "User points not found")
+    ACHIEVEMENT_NOT_FOUND = (404308, "Achievement not found")
+    REWARD_NOT_FOUND = (404309, "Reward not found")

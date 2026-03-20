@@ -42,3 +42,16 @@ class UserPointsRepository:
             self.db_session.commit()
             self.db_session.refresh(model)
         return model.to_entity()
+
+    def add_points_redeemed(self, user_id: int, points: int, commit: bool = True) -> PointsEntity:
+        model: UserPointsModel | None = (
+            self.db_session.query(UserPointsModel).filter_by(user_id=user_id).first()
+        )
+        if model is None:
+            raise NotFoundError(code=NotFoundErrorCodes.USER_POINTS_NOT_FOUND.code())
+
+        model.points_redeemed = model.points_redeemed + points
+        if commit:
+            self.db_session.commit()
+            self.db_session.refresh(model)
+        return model.to_entity()

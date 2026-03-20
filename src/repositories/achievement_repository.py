@@ -16,3 +16,9 @@ class AchievementRepository:
         )
         return [m.to_entity() for m in models]
 
+    def find_by_id(self, achievement_id: int) -> AchievementEntity | None:
+        model: AchievementModel | None = (
+            self.db_session.query(AchievementModel).filter_by(id=achievement_id).first()
+        )
+        return model.to_entity() if model else None
+

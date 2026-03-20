@@ -14,3 +14,4 @@ from .refresh_token_model import RefreshTokenModel
 from .user_points_model import UserPointsModel
 from .achievement_model import AchievementModel
 from .user_achievement_model import UserAchievementModel
+from .reward_model import RewardModel

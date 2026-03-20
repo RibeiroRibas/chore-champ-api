@@ -14,3 +14,4 @@ class BadRequestErrorCode(BaseErrorCode):
     CHORE_CANNOT_COMPLETE = (400309, "Only the assignee or an admin can complete this chore")
     RECURRENCE_DAY_IDS_REQUIRED = (400310, "Recurrence day ids are required")
     ASSIGNED_TO_USER_ID_REQUIRED = (400311, "Assigned to user id is required")
+    REWARD_NOT_UNLOCKED = (400312, "Reward is locked for current user")
