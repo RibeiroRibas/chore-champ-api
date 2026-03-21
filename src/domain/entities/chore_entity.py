@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from src.domain.entities.current_user_entity import CurrentUserEntity
 from src.domain.errors.bad_request_error import BadRequestError
 from src.domain.errors.codes.bad_request_error_codes import BadRequestErrorCode

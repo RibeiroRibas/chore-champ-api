@@ -1,3 +1,7 @@
+from src.domain.errors.bad_request_error import BadRequestError
+from src.domain.errors.codes.bad_request_error_codes import BadRequestErrorCode
+
+
 class RewardEntity:
     def __init__(
         self,
@@ -21,8 +25,5 @@ class RewardEntity:
         return available_points >= self.required_points
 
     def validate_can_claim(self, available_points: int) -> None:
-        from src.domain.errors.bad_request_error import BadRequestError
-        from src.domain.errors.codes.bad_request_error_codes import BadRequestErrorCode
-
         if not self.is_unlocked(available_points=available_points):
             raise BadRequestError(code=BadRequestErrorCode.REWARD_NOT_UNLOCKED.code())

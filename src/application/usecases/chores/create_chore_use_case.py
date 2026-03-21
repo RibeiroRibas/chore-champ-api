@@ -1,5 +1,4 @@
 from src.api.v1.requests.chores.create_chore_request import CreateChoreRequest
-from src.api.v1.responses.chores.chore_response import ChoreResponse
 from src.application.schemas.chores.create_chore_dto import CreateChoreDTO
 from src.application.schemas.users.add_user_points_dto import AddUserPointsDTO
 from src.domain.entities.chore_entity import ChoreEntity
@@ -10,6 +9,9 @@ from src.domain.errors.codes.bad_request_error_codes import BadRequestErrorCode
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.internal_error import InternalError
 from src.domain.schemas.recurring_chore_dto import RecurringChoreDTO
+from src.domain.services.detect_new_reward_unlocked_service import (
+    DetectNewRewardUnlockedService,
+)
 from src.domain.services.save_user_points_service import SaveUserPointsService
 from src.infra.decorators.logger import logging
 from src.repositories.chore_repository import ChoreRepository
@@ -22,14 +24,15 @@ class CreateChoreUseCase:
         chore_repository: ChoreRepository,
         recurring_chore_repository: RecurringChoreRepository,
         save_user_points_service: SaveUserPointsService,
+        detect_new_reward_unlocked_service: DetectNewRewardUnlockedService,
     ):
         self.chore_repository = chore_repository
         self.recurring_chore_repository = recurring_chore_repository
         self.save_user_points_service = save_user_points_service
-
+        self.detect_new_reward_unlocked_service = detect_new_reward_unlocked_service
 
     @logging(show_args=True, show_return=True)
-    def execute(self, request: CreateChoreRequest, current_user: CurrentUserEntity) -> ChoreResponse:
+    def execute(self, request: CreateChoreRequest, current_user: CurrentUserEntity) -> bool:
         try:
             return self.__process_create_chore(request, current_user)
         except Exception as error:
@@ -37,7 +40,7 @@ class CreateChoreUseCase:
                 raise error
             raise InternalError(code=InternalErrorCodes.CREATE_CHORE_ERROR.code())
 
-    def __process_create_chore(self, request: CreateChoreRequest, current_user: CurrentUserEntity) -> ChoreResponse:
+    def __process_create_chore(self, request: CreateChoreRequest, current_user: CurrentUserEntity) -> bool:
         if request.is_recurring and (request.recurrence_day_ids is None or len(request.recurrence_day_ids) == 0):
             raise BadRequestError(code=BadRequestErrorCode.RECURRENCE_DAY_IDS_REQUIRED.code())
 
@@ -49,10 +52,19 @@ class CreateChoreUseCase:
             should_commit = request.completed is False
             self.create_recurring_chore(current_user, entity, request, should_commit)
 
-        if request.completed:
-            self.__update_points(current_user, request)
+        new_reward_unlocked = self.__detect_new_reward_unlocked_and_update_points(request, current_user)
 
-        return ChoreResponse.from_entity(entity)
+        return new_reward_unlocked
+
+    def __detect_new_reward_unlocked_and_update_points(self, request: CreateChoreRequest, current_user: CurrentUserEntity) -> bool:
+        new_reward_unlocked = False
+        if request.completed and request.assigned_to_user_id is not None:
+            check = self.detect_new_reward_unlocked_service.execute(
+                user_id=request.assigned_to_user_id,
+                mutate_points=lambda: self.__update_points(current_user, request),
+            )
+            new_reward_unlocked = check.new_reward_unlocked
+        return new_reward_unlocked
 
     def __create_chore(self, current_user: CurrentUserEntity, request: CreateChoreRequest) -> ChoreEntity:
         dto = CreateChoreDTO(
@@ -77,7 +89,7 @@ class CreateChoreUseCase:
             points=request.points,
             family_id=current_user.family_id,
         )
-        self.save_user_points_service.execute(points_dto)
+        self.save_user_points_service.execute(dto=points_dto)
 
     def create_recurring_chore(self, current_user: CurrentUserEntity, entity: ChoreEntity, request: CreateChoreRequest,
                                should_commit: bool):

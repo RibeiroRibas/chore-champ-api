@@ -24,6 +24,9 @@ from src.api.v1.requests.chores.get_chores_filtered_request import (
 )
 from src.api.v1.requests.chores.update_chore_request import UpdateChoreRequest
 from src.api.v1.responses.chores.chore_response import ChoreResponse
+from src.api.v1.responses.chores.chore_reward_unlock_response import (
+    ChoreRewardUnlockResponse,
+)
 from src.api.v1.responses.chores.chores_paginated_response import (
     ChoresPaginatedResponse,
 )
@@ -73,7 +76,8 @@ def list_all_chores(
 
 @router.post(
     "",
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_200_OK,
+    response_model=ChoreRewardUnlockResponse,
     responses=chores_error_docs.create_chore,
 )
 @request_logging
@@ -81,12 +85,12 @@ def create_chore(
     current_user: Annotated[CurrentUserEntity, Depends(get_current_user_entity)],
     request: CreateChoreRequest,
     use_case: Annotated[CreateChoreUseCase, Depends(create_chore_use_case)],
-) -> Response:
-    use_case.execute(
+) -> ChoreRewardUnlockResponse:
+    new_reward_unlocked = use_case.execute(
         request=request,
         current_user=current_user,
     )
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return ChoreRewardUnlockResponse(new_reward_unlocked=new_reward_unlocked)
 
 
 @router.get(
@@ -106,7 +110,8 @@ def get_chore(
 
 @router.put(
     "/{chore_id:int}",
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_200_OK,
+    response_model=ChoreRewardUnlockResponse,
     responses=chores_error_docs.update_chore,
 )
 @request_logging
@@ -115,8 +120,9 @@ def update_chore(
     user: Annotated[CurrentUserEntity, Depends(get_current_user_entity)],
     request: UpdateChoreRequest,
     use_case: Annotated[UpdateChoreUseCase, Depends(update_chore_use_case)],
-):
-    use_case.execute(chore_id=chore_id, current_user=user, request=request)
+) -> ChoreRewardUnlockResponse:
+    new_reward_unlocked = use_case.execute(chore_id=chore_id, current_user=user, request=request)
+    return ChoreRewardUnlockResponse(new_reward_unlocked=new_reward_unlocked)
 
 
 @router.patch(
@@ -151,7 +157,8 @@ def remove_assign_chore_to_me(
 
 @router.patch(
     "/{chore_id:int}/complete",
-    status_code=status.HTTP_204_NO_CONTENT,
+    status_code=status.HTTP_200_OK,
+    response_model=ChoreRewardUnlockResponse,
     responses=chores_error_docs.complete_chore,
 )
 @request_logging
@@ -159,9 +166,9 @@ def complete_chore(
     chore_id: int,
     user: Annotated[CurrentUserEntity, Depends(get_current_user_entity)],
     use_case: Annotated[CompleteChoreUseCase, Depends(complete_chore_use_case)],
-) -> Response:
-    use_case.execute(chore_id=chore_id, current_user=user)
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+) -> ChoreRewardUnlockResponse:
+    new_reward_unlocked = use_case.execute(chore_id=chore_id, current_user=user)
+    return ChoreRewardUnlockResponse(new_reward_unlocked=new_reward_unlocked)
 
 
 @router.delete(

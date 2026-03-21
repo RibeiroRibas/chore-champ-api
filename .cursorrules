@@ -36,7 +36,9 @@ src/
 ```
 
 - Imports sempre absolutos com prefixo `src.` (ex.: `from src.domain.entities.user_entity import UserEntity`).
+- **Nunca usar imports dentro de métodos, funções ou blocos.** Todos os imports devem ficar no topo do ficheiro.
 - Nomes de arquivos e pastas em **snake_case**; classes em **PascalCase**.
+- **Sem comentários no código** (`#`, docstrings explicativas de bloco, etc.): não adicionar comentários no código-fonte. Preferir **nomes claros** (variáveis, funções, métodos, classes) que expliquem a intenção; extrair funções ou constantes com nomes descritivos em vez de comentar o “porquê” ou o “o quê”.
 
 ---
 
@@ -202,7 +204,8 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 
 - **Caso de uso ↔ caso de uso:** um caso de uso **nunca** chama outro caso de uso (nem recebe outro use case no construtor para o invocar). Lógica partilhada entre fluxos deve ficar em **serviços de domínio** (`src/domain/services/`), **entidades** ou **repositórios**, e os use cases compõem apenas essas dependências.
 - **Método público do caso de uso:** o único método público da classe do use case deve ser **`call`** (tipado, com retorno explícito quando houver). Toda a orquestração exposta fica em `call`; o resto são métodos privados (`__nome`).
-- **Método público do serviço de domínio** (`src/domain/services/`): o único método público da classe deve ser **`execute`**. Lógica auxiliar em métodos privados (`__nome`).
+- **Método público do serviço de domínio** (`src/domain/services/`): a classe deve expor **apenas um** método público: **`execute`**. Não adicionar outros métodos públicos (ex.: `available_points`, `calculate_*`); toda a API externa do serviço passa por `execute`. Lógica auxiliar e leituras internas ficam em métodos privados (`__nome`). Quando o resultado precisar de vários valores (antes/depois, flags, etc.), `execute` deve devolver uma **entidade de domínio** em `src/domain/entities/` com campos nomeados; o caso de uso (ou o endpoint) extrai só o necessário para a camada seguinte (ex.: um booleano para o body HTTP).
+- **Serviço de domínio em classe — `try`/`except` em `execute`:** sempre que o serviço for uma **classe**, o método público `execute` deve envolver o fluxo em `try`/`except` no padrão do projeto. No `try`, deve existir **apenas uma** invocação a um método privado (ex.: `return self.__execute(...)`, `self.__run(...)`), que concentra toda a orquestração; não colocar várias chamadas diretas no `try` de `execute`. No `except Exception as error:`: se `isinstance(error, BaseError)`, fazer `raise error`; caso contrário `raise InternalError(code=InternalErrorCodes.<NOME_ESPECIFICO_DO_SERVICO>_ERROR.code())`, registando um membro **único** em `src/domain/errors/codes/internal_error_codes.py` para esse serviço. Decorar `execute` com `@logging(show_args=True, show_return=True)` (de `src.infra.decorators.logger`).
 
 > **Nota:** código já existente pode ainda usar `execute` nos use cases; em **novos** use cases e em **refactors** que toquem o ficheiro, adotar `call` nos use cases e manter `execute` apenas nos serviços de domínio.
 
@@ -224,6 +227,15 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 - Para respostas que mapeiam entidade: obter entidade do repositório, eventualmente lançar `NotFoundError`, e retornar `XResponse.from_entity(entity)`.
 - Nunca usar `kwargs**`, `tuples` dou '*' quando está lidando com conversções ou tipagem.
 - Sempre lançar um `raise InternalError(code=InternalErrorCodes.XXX.code())` com o código apropriado para caso de uso, ele deve ser unico e não pode ser reaproveitado por outro caso de uso.
+
+### Testes de unidade (use cases, serviços de domínio e entidades)
+
+- **Obrigatório:** sempre que criar um **novo caso de uso** ou um **novo serviço de domínio**, criar também os **testes de unidade** correspondentes na mesma alteração.
+- **Entidades de domínio (`src/domain/entities/`):** também é **obrigatório** criar testes de unidade quando a entidade tiver **pelo menos um método** (além do construtor `__init__`). Ou seja: se a classe só tiver `__init__` e atributos (modelo de dados puro), **não** é obrigatório ficheiro de teste dedicado; se existir qualquer outro método (`validate_*`, `is_*`, `get_*`, etc.), criar `tests/unit/domain/entities/test_<nome_entidade_em_snake>.py` na mesma alteração, com **`unittest.TestCase`**, cobrindo **todos os ramos** desses métodos (sucesso e erros de domínio esperados).
+- Usar **`unittest`** (biblioteca padrão); **não** usar pytest. Cada ficheiro de teste deve ter **classes** que herdam de `unittest.TestCase`; os métodos de teste devem ser métodos da classe (ex.: `def test_cenario_sucesso(self):`).
+- **Reproduzir todos os cenários possíveis:** sucesso, erros de domínio (`BaseError`), erros inesperados que viram `InternalError`, ramificações condicionais, valores limite (ex.: lista vazia, None, listas com um elemento).
+- Espelhar a estrutura em `tests/unit/` (ex.: `tests/unit/domain/services/test_detect_new_reward_unlocked_service.py`, `tests/unit/domain/entities/test_chore_entity.py`, `tests/unit/application/usecases/chores/test_create_chore_use_case.py`).
+- Dependências externas (repositórios, outros serviços) com **mocks** (`unittest.mock.Mock` / `MagicMock`). Para entidades, instanciar a entidade com dados de teste e chamar os métodos diretamente (sem mocks de repositório, salvo quando o método depender de outro objeto injetado).
 
 ---
 
@@ -298,15 +310,15 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 | Dependencies  | api/v1/dependencies/     | get_db → repositórios → use case; nome *_use_case |
 | Request/Resp  | api/v1/requests|responses/| Pydantic BaseModel, Field(..., examples=...); Response com from_entity se aplicável |
 | Docs          | api/v1/docs/errors/      | build_doc_errors_response por status e método |
-| Entity        | domain/entities/         | Classe simples, atributos tipados |
+| Entity        | domain/entities/         | Classe simples, atributos tipados; se tiver métodos além de `__init__`, **+ testes em `tests/unit/domain/entities/`** |
 | Error         | domain/errors/           | BaseError(code), *ErrorCodes(BaseErrorCode), (code_int, message_str), .code() |
 | DTO           | application/schemas/     | @dataclass |
 | Use case      | application/usecases/    | **call()** (único público), @logging, try/except BaseError → InternalError |
-| Domain service| domain/services/         | **execute()** (único público); sem chamar use cases |
+| Domain service| domain/services/         | **execute()** único público; `try` com **uma** chamada privada; `except` → BaseError relança senão InternalError + código único; `@logging` em `execute`; sem chamar use cases |
 | Repository    | repositories/            | Session no __init__, DTO in / Entity out, commit: bool = True |
 | Model         | repositories/models/     | Base, __tablename__, to_entity(), from_entity() se necessário |
 
-Ao criar um novo recurso (ex.: "tasks"), seguir esta ordem: entidade → model + migration → repositório → DTOs → use cases → dependencies → requests/responses → error_docs → endpoints → registar router em router_v1.
+Ao criar um novo recurso (ex.: "tasks"), seguir esta ordem: entidade (se tiver métodos além de `__init__`, **testes da entidade**) → model + migration → repositório → DTOs → use cases → dependencies → requests/responses → error_docs → endpoints → registar router em router_v1.
 
 ---
 

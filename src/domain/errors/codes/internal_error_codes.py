@@ -41,3 +41,6 @@ class InternalErrorCodes(BaseErrorCode):
     UPDATE_REWARD_ERROR = (500336, "Update reward operation error")
     DELETE_REWARD_ERROR = (500337, "Delete reward operation error")
     CLAIM_REWARD_ERROR = (500338, "Claim reward operation error")
+    RECURRING_CHORE_SERVICE_ERROR = (500339, "Recurring chore service error")
+    LIST_TODAY_CHORE_ENTITIES_SERVICE_ERROR = (500340, "List today chore entities service error")
+    DETECT_NEW_REWARD_UNLOCKED_SERVICE_ERROR = (500341, "Detect new reward unlocked service error")
