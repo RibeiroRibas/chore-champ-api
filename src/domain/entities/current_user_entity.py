@@ -1,4 +1,6 @@
 from src.domain.enums.user_role_enum import UserRoleEnum
+from src.domain.errors.bad_request_error import BadRequestError
+from src.domain.errors.codes.bad_request_error_codes import BadRequestErrorCode
 
 
 class CurrentUserEntity:
@@ -10,3 +12,12 @@ class CurrentUserEntity:
 
     def is_admin(self) -> bool:
         return self.role_id == UserRoleEnum.ADMIN.value[0]
+
+    def validate_chore_create_assignee(self, assigned_to_user_id: int | None) -> None:
+        """Colaborador só pode criar tarefa com responsável = ele próprio."""
+        if self.is_admin():
+            return
+        if assigned_to_user_id is None or assigned_to_user_id != self.user_id:
+            raise BadRequestError(
+                code=BadRequestErrorCode.COLLABORATOR_CREATE_CHORE_MUST_ASSIGN_TO_SELF.code()
+            )

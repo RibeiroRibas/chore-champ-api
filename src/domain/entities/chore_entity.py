@@ -58,17 +58,29 @@ class ChoreEntity:
         if self.completed:
             raise BadRequestError(code=BadRequestErrorCode.CHORE_ALREADY_COMPLETED.code())
 
-        if not current_user.is_admin():
-            if self.assigned_to_user_id is None or self.assigned_to_user_id != current_user.user_id:
-                raise BadRequestError(code=BadRequestErrorCode.CHORE_CANNOT_REMOVE_ASSIGNMENT.code())
+        if self.assigned_to_user_id is None:
+            raise BadRequestError(code=BadRequestErrorCode.CHORE_CANNOT_REMOVE_ASSIGNMENT.code())
 
-    def validate_can_complete(self, current_user: CurrentUserEntity) -> None:
+        if not current_user.is_admin():
+            raise BadRequestError(
+                code=BadRequestErrorCode.ONLY_ADMIN_CAN_REMOVE_CHORE_ASSIGNMENT.code()
+            )
+
+    def validate_can_complete(
+        self, current_user: CurrentUserEntity, today_chores: list[ChoreEntity]
+    ) -> None:
         if self.completed:
             raise BadRequestError(code=BadRequestErrorCode.CHORE_ALREADY_COMPLETED.code())
-
-        if self.completed and self.assigned_to_user_id is None:
-            raise BadRequestError(code=BadRequestErrorCode.ASSIGNED_TO_USER_ID_REQUIRED.code())
 
         if not current_user.is_admin():
             if self.assigned_to_user_id is None or self.assigned_to_user_id != current_user.user_id:
                 raise BadRequestError(code=BadRequestErrorCode.CHORE_CANNOT_COMPLETE.code())
+
+            if not self.is_chore_in_today_list(today_chores):
+                raise BadRequestError(
+                    code=BadRequestErrorCode.COLLABORATOR_CAN_ONLY_COMPLETE_TODAY_CHORES.code()
+                )
+
+    def is_chore_in_today_list(self, today_chores: list[ChoreEntity]) -> bool:
+        return any(e.id == self.id for e in today_chores)
+

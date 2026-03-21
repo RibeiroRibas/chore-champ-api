@@ -11,6 +11,9 @@ from src.application.usecases.chores.list_today_chores_use_case import ListToday
 from src.application.usecases.chores.remove_assign_chore_to_me_use_case import RemoveAssignChoreToMeUseCase
 from src.application.usecases.chores.update_chore_use_case import UpdateChoreUseCase
 from src.domain.services.get_chore_service import GetChoreService
+from src.domain.services.list_today_chore_entities_service import (
+    ListTodayChoreEntitiesService,
+)
 from src.domain.services.get_chore_user_service import GetChoreUSerService
 from src.domain.services.recurring_chore_service import RecurringChoreService
 from src.domain.services.save_user_points_service import SaveUserPointsService
@@ -23,9 +26,14 @@ from src.repositories.user_achievement_repository import UserAchievementReposito
 
 
 def list_today_chores_use_case(db: Session = Depends(get_db)) -> ListTodayChoresUseCase:
+    chore_repository = ChoreRepository(db_session=db)
+    recurring_chore_repository = RecurringChoreRepository(db_session=db)
+    list_today_service = ListTodayChoreEntitiesService(
+        chore_repository=chore_repository,
+        recurring_chore_repository=recurring_chore_repository,
+    )
     return ListTodayChoresUseCase(
-        chore_repository=ChoreRepository(db_session=db),
-        recurring_chore_repository=RecurringChoreRepository(db_session=db),
+        list_today_chore_entities_service=list_today_service,
     )
 
 
@@ -60,11 +68,16 @@ def update_chore_use_case(db: Session = Depends(get_db)) -> UpdateChoreUseCase:
     save_user_points_service = SaveUserPointsService(
         user_points_repository=UserPointsRepository(db_session=db),
     )
+    list_today_service = ListTodayChoreEntitiesService(
+        chore_repository=chore_repository,
+        recurring_chore_repository=recurring_chore_repository,
+    )
     return UpdateChoreUseCase(
         chore_repository=chore_repository,
         get_chore_service=GetChoreService(chore_repository=chore_repository),
         recurring_chore_service=recurring_chore_service,
         save_user_points_service=save_user_points_service,
+        list_today_chore_entities_service=list_today_service,
     )
 
 
@@ -102,9 +115,14 @@ def complete_chore_use_case(db: Session = Depends(get_db)) -> CompleteChoreUseCa
     save_user_points_service = SaveUserPointsService(
         user_points_repository=UserPointsRepository(db_session=db),
     )
+    list_today_service = ListTodayChoreEntitiesService(
+        chore_repository=chore_repository,
+        recurring_chore_repository=recurring_chore_repository,
+    )
     return CompleteChoreUseCase(
         chore_repository=chore_repository,
         get_chore_service=GetChoreService(chore_repository=chore_repository),
         recurring_chore_service=recurring_chore_service,
         save_user_points_service=save_user_points_service,
+        list_today_chore_entities_service=list_today_service,
     )

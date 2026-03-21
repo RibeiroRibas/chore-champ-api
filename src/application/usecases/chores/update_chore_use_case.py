@@ -10,6 +10,7 @@ from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.internal_error import InternalError
 from src.domain.schemas.recurring_chore_dto import RecurringChoreDTO
 from src.domain.services.get_chore_service import GetChoreService
+from src.domain.services.list_today_chore_entities_service import ListTodayChoreEntitiesService
 from src.domain.services.recurring_chore_service import RecurringChoreService
 from src.domain.services.save_user_points_service import SaveUserPointsService
 from src.infra.decorators.logger import logging
@@ -23,11 +24,13 @@ class UpdateChoreUseCase:
         get_chore_service: GetChoreService,
         recurring_chore_service: RecurringChoreService,
         save_user_points_service: SaveUserPointsService,
+        list_today_chore_entities_service: ListTodayChoreEntitiesService,
     ):
         self.chore_repository = chore_repository
         self.get_chore_service = get_chore_service
         self.recurring_chore_service = recurring_chore_service
         self.save_user_points_service = save_user_points_service
+        self.list_today_chore_entities_service = list_today_chore_entities_service
 
     @logging(show_args=True, show_return=True)
     def execute(self, chore_id: int, current_user: CurrentUserEntity, request: UpdateChoreRequest):
@@ -45,7 +48,7 @@ class UpdateChoreUseCase:
         if request.completed and request.assigned_to_user_id is None:
             raise BadRequestError(code=BadRequestErrorCode.ASSIGNED_TO_USER_ID_REQUIRED.code())
 
-        self.__validate_can_update(chore_id, current_user)
+        self.__validate_can_update(chore_id, current_user, request)
 
         if request.is_recurring:
             self.update_recurring_chore(current_user, chore_id, request)
@@ -85,11 +88,14 @@ class UpdateChoreUseCase:
             update_chore_dto=dto,
         )
 
-    def __validate_can_update(self, chore_id: int, current_user: CurrentUserEntity):
+    def __validate_can_update(self, chore_id: int, current_user: CurrentUserEntity, request: UpdateChoreRequest):
         entity: ChoreEntity = self.get_chore_service.execute(chore_id=chore_id, family_id=current_user.family_id)
 
         entity.validate_has_update_permission(current_user=current_user)
         entity.validate_can_update_or_delete()
+        if request.completed:
+            today_chores = self.list_today_chore_entities_service.execute(current_user.family_id)
+            entity.validate_can_complete(current_user, today_chores)
 
     def update_recurring_chore(self, current_user: CurrentUserEntity, chore_id: int, request: UpdateChoreRequest):
         recurring_dto = RecurringChoreDTO(

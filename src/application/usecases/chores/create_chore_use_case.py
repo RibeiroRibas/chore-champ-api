@@ -41,6 +41,8 @@ class CreateChoreUseCase:
         if request.is_recurring and (request.recurrence_day_ids is None or len(request.recurrence_day_ids) == 0):
             raise BadRequestError(code=BadRequestErrorCode.RECURRENCE_DAY_IDS_REQUIRED.code())
 
+        current_user.validate_chore_create_assignee(request.assigned_to_user_id)
+
         entity = self.__create_chore(current_user, request)
 
         if request.is_recurring:

@@ -69,7 +69,7 @@ src/
   - Handler recebe use case via `Depends(nome_funcao_use_case)` e request body ou path/query quando aplicável.
   - Rotas protegidas: `current_auth_id: Annotated[int, Depends(get_current_auth_id)]`.
   - Duas formas de obter `CurrentUserEntity`, quando a rota não é protegida: `Depends(has_permission_admin_use_case)` ou quando a rota não é protegida: `Depends(get_current_user_entity)`.
-  - Chamar `use_case.execute(...)` com os parâmetros adequados (request, auth_id, etc.).
+  - Chamar `use_case.call(...)` com os parâmetros adequados (request, auth_id, etc.).
 
 Exemplo de rota POST com corpo e 204:
 
@@ -80,7 +80,7 @@ Exemplo de rota POST com corpo e 204:
 )
 @request_logging
 def create(use_case: Annotated[CreateAuthUseCase, Depends(create_auth_use_case)], request: CreateAuthRequest):
-    return use_case.execute(request=request)
+    return use_case.call(request=request)
 ```
 
 Exemplo de rota GET com response model:
@@ -94,7 +94,7 @@ Exemplo de rota GET com response model:
 @request_logging
 def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_current_user_use_case)],
                      current_auth_id: Annotated[int, Depends(get_current_auth_id)]) -> CurrentUserResponse:
-    return use_case.execute(auth_id=current_auth_id)
+    return use_case.call(auth_id=current_auth_id)
 ```
 
 Exemplo de rota com `CurrentUserEntity` e rota protegida:
@@ -108,7 +108,7 @@ Exemplo de rota com `CurrentUserEntity` e rota protegida:
 @request_logging
 def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_current_user_use_case)],
                      user: Annotated[CurrentUserEntity, Depends(has_permission_admin_use_case)]) -> CurrentUserResponse:
-    return use_case.execute(auth_id=current_auth_id)
+    return use_case.call(auth_id=current_auth_id)
 ```
 
 Exemplo de rota com `CurrentUserEntity` e rota não protegida:
@@ -122,7 +122,7 @@ Exemplo de rota com `CurrentUserEntity` e rota não protegida:
 @request_logging
 def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_current_user_use_case)],
                      user: Annotated[CurrentUserEntity, Depends(get_current_user_entity)]) -> CurrentUserResponse:
-    return use_case.execute(auth_id=current_auth_id)
+    return use_case.call(auth_id=current_auth_id)
 ```
 
 ---
@@ -132,7 +132,7 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 - Ficheiros em `src/api/v1/dependencies/` por recurso (ex.: `auth_dependencies.py`, `users_dependencies.py`).
 - Cada função de dependency: recebe `db: Session = Depends(get_db)`, instancia repositórios e use case(s), retorna o use case.
 - Nome da função: `{verbo_ou_acao}_use_case` (ex.: `create_current_user_use_case`, `login_use_case`).
-- Use cases que precisam de outros use cases: instanciar esses use cases dentro da dependency e passá-los no construtor.
+- **Não injetar um use case dentro de outro use case** (ver secção 9 – contratos). Compor apenas com repositórios, serviços de domínio, serviços de infra quando aplicável.
 
 ---
 
@@ -198,6 +198,14 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 
 ## 9. Application – DTOs e Use Cases
 
+### Contratos obrigatórios (use cases e serviços de domínio)
+
+- **Caso de uso ↔ caso de uso:** um caso de uso **nunca** chama outro caso de uso (nem recebe outro use case no construtor para o invocar). Lógica partilhada entre fluxos deve ficar em **serviços de domínio** (`src/domain/services/`), **entidades** ou **repositórios**, e os use cases compõem apenas essas dependências.
+- **Método público do caso de uso:** o único método público da classe do use case deve ser **`call`** (tipado, com retorno explícito quando houver). Toda a orquestração exposta fica em `call`; o resto são métodos privados (`__nome`).
+- **Método público do serviço de domínio** (`src/domain/services/`): o único método público da classe deve ser **`execute`**. Lógica auxiliar em métodos privados (`__nome`).
+
+> **Nota:** código já existente pode ainda usar `execute` nos use cases; em **novos** use cases e em **refactors** que toquem o ficheiro, adotar `call` nos use cases e manter `execute` apenas nos serviços de domínio.
+
 ### DTOs (schemas)
 
 - Em `src/application/schemas/`, com subpastas por recurso quando fizer sentido (ex.: `users/create_user_dto.py`, `auth/create_auth_dto.py`).
@@ -208,10 +216,10 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 ### Use cases
 
 - Um ficheiro por use case em `src/application/usecases/{recurso}/` (ex.: `create_current_user_use_case.py`).
-- Classe com nome descritivo (ex.: `CreateCurrentUserUseCase`). Construtor recebe repositórios e, se necessário, outros use cases.
-- Método público: `execute(self, ...)` com parâmetros tipados (request, auth_id, etc.). Retorno tipado quando houver (ex.: `CurrentUserResponse`).
-- Decorar `execute` com `@logging(show_args=True, show_return=True)` (de `src.infra.decorators.logger`).
-- Dentro de `execute`: `try:` chamando método(s) privados (ex.: `__create_user`); `except Exception as error:` se `isinstance(error, BaseError): raise error` senão `raise InternalError(code=InternalErrorCodes.XXX.code())`.
+- Classe com nome descritivo (ex.: `CreateCurrentUserUseCase`). Construtor recebe repositórios e **serviços de domínio** (ou outros serviços permitidos); **nunca** outro use case.
+- Método público único: **`call(self, ...)`** com parâmetros tipados (request, auth_id, etc.). Retorno tipado quando houver (ex.: `CurrentUserResponse`).
+- Decorar **`call`** com `@logging(show_args=True, show_return=True)` (de `src.infra.decorators.logger`).
+- Dentro de `call`: `try:` chamando método(s) privados (ex.: `__create_user`); `except Exception as error:` se `isinstance(error, BaseError): raise error` senão `raise InternalError(code=InternalErrorCodes.XXX.code())`.
 - Regras de negócio de preferência nos serviços de domínio ou nas entidades de domínio, validações no use case; lançar `BadRequestError`, `NotFoundError`, etc. com o código correspondente.
 - Para respostas que mapeiam entidade: obter entidade do repositório, eventualmente lançar `NotFoundError`, e retornar `XResponse.from_entity(entity)`.
 - Nunca usar `kwargs**`, `tuples` dou '*' quando está lidando com conversções ou tipagem.
@@ -268,7 +276,7 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 ### Decorators
 
 - `request_logging`: em todos os handlers de endpoint.
-- `logging(show_args=..., show_return=...)`: em métodos `execute` dos use cases.
+- `logging(show_args=..., show_return=...)`: em métodos **`call`** dos use cases e em **`execute`** dos serviços de domínio.
 
 ---
 
@@ -293,7 +301,8 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 | Entity        | domain/entities/         | Classe simples, atributos tipados |
 | Error         | domain/errors/           | BaseError(code), *ErrorCodes(BaseErrorCode), (code_int, message_str), .code() |
 | DTO           | application/schemas/     | @dataclass |
-| Use case      | application/usecases/    | execute(), @logging, try/except BaseError → InternalError |
+| Use case      | application/usecases/    | **call()** (único público), @logging, try/except BaseError → InternalError |
+| Domain service| domain/services/         | **execute()** (único público); sem chamar use cases |
 | Repository    | repositories/            | Session no __init__, DTO in / Entity out, commit: bool = True |
 | Model         | repositories/models/     | Base, __tablename__, to_entity(), from_entity() se necessário |
 

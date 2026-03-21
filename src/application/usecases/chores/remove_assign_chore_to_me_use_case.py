@@ -1,4 +1,3 @@
-from src.api.v1.responses.chores.chore_response import ChoreResponse
 from src.application.schemas.chores.update_chore_dto import UpdateChoreDTO
 from src.domain.entities.chore_entity import ChoreEntity
 from src.domain.entities.current_user_entity import CurrentUserEntity
@@ -16,15 +15,15 @@ class RemoveAssignChoreToMeUseCase:
         self.get_chore_service = get_chore_service
 
     @logging(show_args=True, show_return=True)
-    def execute(self, chore_id: int, current_user: CurrentUserEntity) -> ChoreResponse:
+    def execute(self, chore_id: int, current_user: CurrentUserEntity) -> None:
         try:
-            return self.__remove_assign_chore_to_me(chore_id=chore_id, current_user=current_user)
+            self.__remove_assign_chore_to_me(chore_id=chore_id, current_user=current_user)
         except Exception as error:
             if isinstance(error, BaseError):
                 raise error
             raise InternalError(code=InternalErrorCodes.REMOVE_ASSIGN_CHORE_TO_ME_ERROR.code())
 
-    def __remove_assign_chore_to_me(self, chore_id: int, current_user: CurrentUserEntity) -> ChoreResponse:
+    def __remove_assign_chore_to_me(self, chore_id: int, current_user: CurrentUserEntity) -> None:
         chore: ChoreEntity = self.get_chore_service.execute(
             chore_id=chore_id,
             family_id=current_user.family_id,
@@ -40,9 +39,8 @@ class RemoveAssignChoreToMeUseCase:
             completed=chore.completed,
             is_recurring=chore.is_recurring
         )
-        updated: ChoreEntity = self.chore_repository.update(
+        self.chore_repository.update(
             chore_id=chore_id,
             family_id=current_user.family_id,
             update_chore_dto=dto,
         )
-        return ChoreResponse.from_entity(updated)

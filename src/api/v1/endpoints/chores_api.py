@@ -121,8 +121,7 @@ def update_chore(
 
 @router.patch(
     "/{chore_id:int}/assign-to-me",
-    status_code=status.HTTP_200_OK,
-    response_model=ChoreResponse,
+    status_code=status.HTTP_204_NO_CONTENT,
     responses=chores_error_docs.assign_chore_to_me,
 )
 @request_logging
@@ -130,14 +129,14 @@ def assign_chore_to_me(
     chore_id: int,
     user: Annotated[CurrentUserEntity, Depends(get_current_user_entity)],
     use_case: Annotated[AssignChoreToMeUseCase, Depends(assign_chore_to_me_use_case)],
-) -> ChoreResponse:
-    return use_case.execute(chore_id=chore_id, current_user=user)
+) -> Response:
+    use_case.execute(chore_id=chore_id, current_user=user)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.patch(
     "/{chore_id:int}/remove-assign-to-me",
-    status_code=status.HTTP_200_OK,
-    response_model=ChoreResponse,
+    status_code=status.HTTP_204_NO_CONTENT,
     responses=chores_error_docs.remove_assign_chore_to_me,
 )
 @request_logging
@@ -145,14 +144,14 @@ def remove_assign_chore_to_me(
     chore_id: int,
     user: Annotated[CurrentUserEntity, Depends(get_current_user_entity)],
     use_case: Annotated[RemoveAssignChoreToMeUseCase, Depends(remove_assign_chore_to_me_use_case)],
-) -> ChoreResponse:
-    return use_case.execute(chore_id=chore_id, current_user=user)
+) -> Response:
+    use_case.execute(chore_id=chore_id, current_user=user)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.patch(
     "/{chore_id:int}/complete",
-    status_code=status.HTTP_200_OK,
-    response_model=ChoreResponse,
+    status_code=status.HTTP_204_NO_CONTENT,
     responses=chores_error_docs.complete_chore,
 )
 @request_logging
@@ -160,8 +159,9 @@ def complete_chore(
     chore_id: int,
     user: Annotated[CurrentUserEntity, Depends(get_current_user_entity)],
     use_case: Annotated[CompleteChoreUseCase, Depends(complete_chore_use_case)],
-) -> ChoreResponse:
-    return use_case.execute(chore_id=chore_id, current_user=user)
+) -> Response:
+    use_case.execute(chore_id=chore_id, current_user=user)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.delete(

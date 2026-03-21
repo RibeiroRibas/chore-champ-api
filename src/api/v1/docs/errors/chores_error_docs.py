@@ -34,6 +34,12 @@ list_all_chores = {
 
 
 create_chore = {
+    400: build_doc_errors_response(
+        [
+            BadRequestErrorCode.RECURRENCE_DAY_IDS_REQUIRED,
+            BadRequestErrorCode.COLLABORATOR_CREATE_CHORE_MUST_ASSIGN_TO_SELF,
+        ]
+    ),
     404: build_doc_errors_response(
         [
             NotFoundErrorCodes.CURRENT_USER_NOT_FOUND,
@@ -66,6 +72,9 @@ update_chore = {
     400: build_doc_errors_response(
         [
             BadRequestErrorCode.CANNOT_UPDATE_OR_DELETE_CHORE_AFTER_COMPLETED,
+            BadRequestErrorCode.COLLABORATOR_CAN_ONLY_COMPLETE_TODAY_CHORES,
+            BadRequestErrorCode.ASSIGNED_TO_USER_ID_REQUIRED,
+            BadRequestErrorCode.RECURRENCE_DAY_IDS_REQUIRED,
         ]
     ),
     401: build_doc_errors_response(
@@ -139,6 +148,7 @@ remove_assign_chore_to_me = {
         [
             BadRequestErrorCode.CHORE_ALREADY_COMPLETED,
             BadRequestErrorCode.CHORE_CANNOT_REMOVE_ASSIGNMENT,
+            BadRequestErrorCode.ONLY_ADMIN_CAN_REMOVE_CHORE_ASSIGNMENT,
         ]
     ),
     404: build_doc_errors_response(
@@ -160,6 +170,7 @@ complete_chore = {
         [
             BadRequestErrorCode.CHORE_ALREADY_COMPLETED,
             BadRequestErrorCode.CHORE_CANNOT_COMPLETE,
+            BadRequestErrorCode.COLLABORATOR_CAN_ONLY_COMPLETE_TODAY_CHORES,
         ]
     ),
     404: build_doc_errors_response(

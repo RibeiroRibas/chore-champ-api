@@ -1,4 +1,3 @@
-from src.api.v1.responses.chores.chore_response import ChoreResponse
 from src.application.schemas.chores.update_chore_dto import UpdateChoreDTO
 from src.application.schemas.users.add_user_points_dto import AddUserPointsDTO
 from src.domain.entities.chore_entity import ChoreEntity
@@ -8,6 +7,9 @@ from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.internal_error import InternalError
 from src.domain.schemas.recurring_chore_dto import RecurringChoreDTO
 from src.domain.services.get_chore_service import GetChoreService
+from src.domain.services.list_today_chore_entities_service import (
+    ListTodayChoreEntitiesService,
+)
 from src.domain.services.recurring_chore_service import RecurringChoreService
 from src.domain.services.save_user_points_service import SaveUserPointsService
 from src.infra.decorators.logger import logging
@@ -21,32 +23,33 @@ class CompleteChoreUseCase:
         get_chore_service: GetChoreService,
         recurring_chore_service: RecurringChoreService,
         save_user_points_service: SaveUserPointsService,
+        list_today_chore_entities_service: ListTodayChoreEntitiesService,
     ):
         self.chore_repository = chore_repository
         self.get_chore_service = get_chore_service
         self.recurring_chore_service = recurring_chore_service
         self.save_user_points_service = save_user_points_service
+        self.list_today_chore_entities_service = list_today_chore_entities_service
 
     @logging(show_args=True, show_return=True)
-    def execute(self, chore_id: int, current_user: CurrentUserEntity) -> ChoreResponse:
+    def execute(self, chore_id: int, current_user: CurrentUserEntity) -> None:
         try:
-            return self.__complete_chore(chore_id=chore_id, current_user=current_user)
+            self.__complete_chore(chore_id=chore_id, current_user=current_user)
         except Exception as error:
             if isinstance(error, BaseError):
                 raise error
             raise InternalError(code=InternalErrorCodes.COMPLETE_CHORE_ERROR.code())
 
-    def __complete_chore(self, chore_id: int, current_user: CurrentUserEntity) -> ChoreResponse:
+    def __complete_chore(self, chore_id: int, current_user: CurrentUserEntity) -> None:
         chore = self.__get_chore_by_id(chore_id, current_user)
-        chore.validate_can_complete(current_user=current_user)
+        today_chores = self.list_today_chore_entities_service.execute(current_user.family_id)
+        chore.validate_can_complete(current_user, today_chores)
         self.__save_user_points(chore, current_user)
 
         if chore.is_recurring:
             self.__handle_recurring_chore(chore_id, current_user, chore)
 
-        updated: ChoreEntity = self.__update_chore(chore, current_user)
-
-        return ChoreResponse.from_entity(updated)
+        self.__update_chore(chore, current_user)
 
     def __get_chore_by_id(self, chore_id: int, current_user: CurrentUserEntity) -> ChoreEntity:
         chore: ChoreEntity = self.get_chore_service.execute(
