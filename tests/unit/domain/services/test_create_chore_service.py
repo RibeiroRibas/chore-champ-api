@@ -1,9 +1,9 @@
 import unittest
 from unittest.mock import MagicMock
 
-from src.application.schemas.chores.create_chore_dto import CreateChoreDTO
-from src.domain.entities.chore_entity import ChoreEntity
-from src.domain.entities.new_reward_unlock_check_entity import NewRewardUnlockCheckEntity
+from src.domain.schemas.dto.chores.create_chore_dto import CreateChoreDTO
+from src.domain.schemas.entity.chore_entity import ChoreEntity
+from src.domain.schemas.entity.new_reward_unlock_check_entity import NewRewardUnlockCheckEntity
 from src.domain.errors.internal_error import InternalError
 from src.domain.services.create_chore_service import CreateChoreService
 

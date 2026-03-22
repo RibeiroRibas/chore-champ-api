@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from src.domain.entities.role_entity import RoleEntity
+from src.domain.schemas.entity.role_entity import RoleEntity
 
 
 class RoleResponse(BaseModel):

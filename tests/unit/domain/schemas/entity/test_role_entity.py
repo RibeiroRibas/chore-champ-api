@@ -1,6 +1,6 @@
 import unittest
 
-from src.domain.entities.role_entity import RoleEntity
+from src.domain.schemas.entity.role_entity import RoleEntity
 from src.domain.enums.user_role_enum import UserRoleEnum
 
 

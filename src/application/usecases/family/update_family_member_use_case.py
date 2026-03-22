@@ -1,6 +1,6 @@
 from src.api.v1.requests.users.update_family_member_request import UpdateFamilyMemberRequest
 from src.api.v1.responses.users.family_member_response import FamilyMemberResponse
-from src.application.schemas.users.update_user_dto import UpdateUserDTO
+from src.domain.schemas.dto.users.update_user_dto import UpdateUserDTO
 from src.domain.enums.user_role_enum import UserRoleEnum
 from src.domain.errors.base_error import BaseError
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes

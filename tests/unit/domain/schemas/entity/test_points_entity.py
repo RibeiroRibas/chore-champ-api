@@ -1,6 +1,6 @@
 import unittest
 
-from src.domain.entities.points_entity import PointsEntity
+from src.domain.schemas.entity.points_entity import PointsEntity
 
 
 class TestPointsEntity(unittest.TestCase):

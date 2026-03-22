@@ -1,6 +1,6 @@
 from collections.abc import Callable
 
-from src.domain.entities.new_reward_unlock_check_entity import NewRewardUnlockCheckEntity
+from src.domain.schemas.entity.new_reward_unlock_check_entity import NewRewardUnlockCheckEntity
 from src.domain.errors.base_error import BaseError
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.internal_error import InternalError

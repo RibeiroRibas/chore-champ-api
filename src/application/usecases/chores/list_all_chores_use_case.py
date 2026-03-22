@@ -3,7 +3,7 @@ from src.api.v1.responses.chores.chore_response import ChoreResponse
 from src.api.v1.responses.chores.chores_paginated_response import (
     ChoresPaginatedResponse,
 )
-from src.application.schemas.chores.get_chores_filtered_dto import (
+from src.domain.schemas.dto.chores.get_chores_filtered_dto import (
     GetChoresFilteredDto,
 )
 from src.domain.errors.base_error import BaseError

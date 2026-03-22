@@ -2,9 +2,9 @@ import unittest
 from unittest.mock import MagicMock
 
 from src.api.v1.requests.chores.create_chore_request import CreateChoreRequest
-from src.application.schemas.chores.create_chore_dto import CreateChoreDTO
+from src.domain.schemas.dto.chores.create_chore_dto import CreateChoreDTO
 from src.application.usecases.chores.create_chore_use_case import CreateChoreUseCase
-from src.domain.entities.current_user_entity import CurrentUserEntity
+from src.domain.schemas.entity.current_user_entity import CurrentUserEntity
 from src.domain.enums.user_role_enum import UserRoleEnum
 from src.domain.errors.bad_request_error import BadRequestError
 from src.domain.errors.internal_error import InternalError

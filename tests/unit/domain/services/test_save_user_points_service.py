@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import MagicMock
 
-from src.application.schemas.users.add_user_points_dto import AddUserPointsDTO
-from src.domain.entities.points_entity import PointsEntity
+from src.domain.schemas.dto.users.add_user_points_dto import AddUserPointsDTO
+from src.domain.schemas.entity.points_entity import PointsEntity
 from src.domain.errors.internal_error import InternalError
 from src.domain.services.save_user_points_service import SaveUserPointsService
 

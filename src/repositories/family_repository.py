@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session, selectinload
 
-from src.domain.entities.family_entity import FamilyEntity
-from src.domain.entities.user_entity import UserEntity
+from src.domain.schemas.entity.family_entity import FamilyEntity
+from src.domain.schemas.entity.user_entity import UserEntity
 from src.domain.enums.user_role_enum import UserRoleEnum
 from src.repositories.models.family_model import FamilyModel
 from src.repositories.models.user_model import UserModel

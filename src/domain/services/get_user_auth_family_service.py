@@ -1,4 +1,4 @@
-from src.domain.entities.user_auth_family_entity import UserAuthFamilyEntity
+from src.domain.schemas.entity.user_auth_family_entity import UserAuthFamilyEntity
 from src.domain.errors.base_error import BaseError
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.codes.not_found_error_codes import NotFoundErrorCodes

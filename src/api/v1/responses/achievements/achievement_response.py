@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from src.domain.entities.achievement_entity import AchievementEntity
+from src.domain.schemas.entity.achievement_entity import AchievementEntity
 
 
 class AchievementResponse(BaseModel):

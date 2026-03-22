@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 
-from src.domain.entities.day_of_week_entity import DayOfWeekEntity
+from src.domain.schemas.entity.day_of_week_entity import DayOfWeekEntity
 from src.domain.errors.internal_error import InternalError
 from src.application.usecases.days_of_week.list_days_of_week_use_case import (
     ListDaysOfWeekUseCase,

@@ -1,6 +1,6 @@
 import unittest
 
-from src.domain.entities.current_user_entity import CurrentUserEntity
+from src.domain.schemas.entity.current_user_entity import CurrentUserEntity
 from src.domain.errors.bad_request_error import BadRequestError
 from src.domain.enums.user_role_enum import UserRoleEnum
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from src.domain.entities.current_user_entity import CurrentUserEntity
-from src.domain.entities.day_of_week_entity import DayOfWeekEntity
+from src.domain.schemas.entity.current_user_entity import CurrentUserEntity
+from src.domain.schemas.entity.day_of_week_entity import DayOfWeekEntity
 from src.domain.errors.bad_request_error import BadRequestError
 from src.domain.errors.codes.bad_request_error_codes import BadRequestErrorCode
 from src.domain.errors.codes.unauthorized_error_codes import UnauthorizedErrorCodes

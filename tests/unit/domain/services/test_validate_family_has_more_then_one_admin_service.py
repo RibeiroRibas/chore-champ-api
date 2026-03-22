@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import MagicMock
 
-from src.domain.entities.family_entity import FamilyEntity
-from src.domain.entities.user_entity import UserEntity
+from src.domain.schemas.entity.family_entity import FamilyEntity
+from src.domain.schemas.entity.user_entity import UserEntity
 from src.domain.errors.bad_request_error import BadRequestError
 from src.domain.errors.internal_error import InternalError
 from src.domain.services.validate_family_has_more_then_one_admin_service import (

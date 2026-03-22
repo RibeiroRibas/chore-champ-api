@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import MagicMock, patch
 
-from src.domain.entities.chore_entity import ChoreEntity
-from src.domain.entities.recurring_chore_entity import RecurringChoreEntity
+from src.domain.schemas.entity.chore_entity import ChoreEntity
+from src.domain.schemas.entity.recurring_chore_entity import RecurringChoreEntity
 from src.domain.errors.internal_error import InternalError
 from src.domain.services.list_today_chore_entities_service import (
     ListTodayChoreEntitiesService,
@@ -43,7 +43,7 @@ class TestListTodayChoreEntitiesService(unittest.TestCase):
         self.assertEqual(result[0], chore)
 
     def test_execute_includes_recurring_chores_matching_today(self):
-        from src.domain.entities.day_of_week_entity import DayOfWeekEntity
+        from src.domain.schemas.entity.day_of_week_entity import DayOfWeekEntity
 
         recurring_chore = ChoreEntity(
             chore_id=1,

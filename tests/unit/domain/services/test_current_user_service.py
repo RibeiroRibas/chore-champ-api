@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 
-from src.domain.entities.current_user_entity import CurrentUserEntity
+from src.domain.schemas.entity.current_user_entity import CurrentUserEntity
 from src.domain.errors.not_found_error import NotFoundError
 from src.domain.services.current_user_service import get_current_user_by_auth_id
 

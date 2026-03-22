@@ -1,5 +1,5 @@
 from src.api.v1.responses.auth.login_response import LoginResponse
-from src.domain.entities.refresh_token_entity import RefreshTokenEntity
+from src.domain.schemas.entity.refresh_token_entity import RefreshTokenEntity
 from src.domain.errors.base_error import BaseError
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.codes.unauthorized_error_codes import UnauthorizedErrorCodes

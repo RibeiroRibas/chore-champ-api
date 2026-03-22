@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from src.application.schemas.common_filters_dto import CommonFiltersDto
+from src.domain.schemas.dto.common_filters_dto import CommonFiltersDto
 
 
 @dataclass

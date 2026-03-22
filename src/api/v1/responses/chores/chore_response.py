@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 from src.api.v1.responses.days_of_week.day_of_week_response import DayOfWeekResponse
-from src.domain.entities.chore_entity import ChoreEntity
+from src.domain.schemas.entity.chore_entity import ChoreEntity
 
 
 class ChoreResponse(BaseModel):

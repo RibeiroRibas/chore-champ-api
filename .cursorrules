@@ -19,12 +19,13 @@ src/
 │       ├── requests/       # Pydantic request por recurso
 │       └── responses/      # Pydantic response por recurso
 ├── application/
-│   ├── schemas/            # DTOs (dataclass) – pode ter subpastas por recurso
 │   └── usecases/           # Use cases por recurso (auth/, users/, ...)
 ├── domain/
-│   ├── entities/           # Entidades de domínio (classes simples)
+│   ├── schemas/
+│   │   ├── dto/            # DTOs do domínio (@dataclass), subpastas por recurso (auth/, chores/, …)
+│   │   └── entity/         # Entidades de domínio (uma por ficheiro)
 │   ├── errors/             # BaseError, erros específicos, codes, models
-│   └── services/           # Serviços de domínio (ex.: BCrypt)
+│   └── services/           # Serviços de domínio
 ├── repositories/           # Acesso a dados
 │   ├── models/             # SQLAlchemy models + Base
 │   └── *_repository.py     # Um repositório por entidade/agregado
@@ -35,7 +36,7 @@ src/
     └── services/           # JWT, email, etc.
 ```
 
-- Imports sempre absolutos com prefixo `src.` (ex.: `from src.domain.entities.user_entity import UserEntity`).
+- Imports sempre absolutos com prefixo `src.` (ex.: `from src.domain.schemas.entity.user_entity import UserEntity`, `from src.domain.schemas.dto.users.create_user_dto import CreateUserDTO`).
 - **Nunca usar imports dentro de métodos, funções ou blocos.** Todos os imports devem ficar no topo do ficheiro.
 - Nomes de arquivos e pastas em **snake_case**; classes em **PascalCase**.
 - **Sem comentários no código (regra obrigatória para a IA):** não adicionar `#`, docstrings explicativas, nem comentários entre `"""` no meio do código. Não adicionar `description=` narrativo em `Field(...)` do Pydantic só para explicar o campo (usar `examples=` quando precisar de exemplo no OpenAPI ou omitir). Preferir **nomes claros** e funções extraídas em vez de comentar intenção.
@@ -145,7 +146,7 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 - Pydantic `BaseModel` em `src/api/v1/requests/{recurso}/`.
 - Campos com `Field(..., examples=[...])` quando fizer sentido para a documentação.
 - Nome do ficheiro/classe: verbo ou contexto + Request (ex.: `CreateCurrentUserRequest`, `LoginRequest`).
-- **GET com mais de dois filtros:** quando um endpoint GET tiver mais de dois parâmetros de filtro (query), criar um modelo de request Pydantic (ex.: `GetChoresFilteredRequest`) para agrupar os filtros. Antes de chegar à camada de domínio (repositórios ou serviços), essa request deve ser convertida para um DTO da camada de aplicação (ex.: `GetChoresFilteredDto`). O endpoint recebe a request (via `Depends` com função que lê os query params), converte para DTO no handler e passa o DTO ao use case; o use case e o repositório recebem apenas o DTO.
+- **GET com mais de dois filtros:** quando um endpoint GET tiver mais de dois parâmetros de filtro (query), criar um modelo de request Pydantic (ex.: `GetChoresFilteredRequest`) para agrupar os filtros. Antes de chegar à camada de domínio (repositórios ou serviços), essa request deve ser convertida para um DTO de domínio (ex.: `GetChoresFilteredDto` em `src/domain/schemas/dto/`). O endpoint recebe a request (via `Depends` com função que lê os query params), converte para DTO no handler e passa o DTO ao use case; o use case e o repositório recebem apenas o DTO.
 
 ### Responses
 
@@ -166,14 +167,12 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 
 ---
 
-## 7. Domain – Entidades
+## 7. Domain – DTOs e entidades (`src/domain/schemas/`)
 
-- Classes simples em `src/domain/entities/`, um ficheiro por entidade (ex.: `user_entity.py` → `UserEntity`).
-- **Regras de negócio têm prioridade em ficar dentro das entidades.** Sempre que uma regra for específica do domínio da entidade (ex.: “só pode atribuir se não estiver concluída”, “só pode remover atribuição se for o responsável”), implemente-a em métodos da própria entidade (ex.: `validate_can_assign_to_current_user()`, `validate_can_remove_assignment()`) e invoque esses métodos no use case. Evite duplicar condições nos use cases; o use case orquestra e delega a validação à entidade.
-- Pode lançar um erro de domínio relacionado a regra de negócio se possível ou quando fizer sentido.
-- Pode conter regras de negócio se for específico daquela entidade.
-- Construtor com atributos tipados (id, nome, FKs, etc.); sem herança obrigatória.
-- Podem ter métodos de domínio (ex.: `validate()`, `update_attempts()`) e atributos privados para regras (ex.: `__max_sms_validation_attempts`).
+- **DTOs:** `src/domain/schemas/dto/` — `@dataclass` com campos tipados; subpastas por recurso quando fizer sentido (ex.: `dto/users/create_user_dto.py`). Ficheiros transversais na raiz de `dto/` (ex.: `paginated_dto.py`, `common_filters_dto.py`). Não usar Pydantic nos DTOs; requests/responses HTTP continuam em `api/v1/requests` e `responses` (Pydantic).
+- **Entidades:** `src/domain/schemas/entity/` — um ficheiro por entidade (ex.: `user_entity.py` → `UserEntity`). Fazem parte da camada de domínio juntamente com os DTOs.
+- **Regras de negócio nas entidades:** sempre que uma regra for específica do domínio da entidade (ex.: “só pode atribuir se não estiver concluída”), implemente-a em métodos da própria entidade e invoque no use case. Evite duplicar condições nos use cases; o use case orquestra e delega a validação à entidade.
+- Construtor com atributos tipados (id, nome, FKs, etc.); podem ter métodos de domínio e atributos privados para regras.
 
 ---
 
@@ -198,23 +197,16 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 
 ---
 
-## 9. Application – DTOs e Use Cases
+## 9. Application – Use Cases
 
 ### Contratos obrigatórios (use cases e serviços de domínio)
 
 - **Caso de uso ↔ caso de uso:** um caso de uso **nunca** chama outro caso de uso (nem recebe outro use case no construtor para o invocar). Lógica partilhada entre fluxos deve ficar em **serviços de domínio** (`src/domain/services/`), **entidades** ou **repositórios**, e os use cases compõem apenas essas dependências.
 - **Método público do caso de uso:** o único método público da classe do use case deve ser **`call`** (tipado, com retorno explícito quando houver). Toda a orquestração exposta fica em `call`; o resto são métodos privados (`__nome`).
-- **Método público do serviço de domínio** (`src/domain/services/`): a classe deve expor **apenas um** método público: **`execute`**. Não adicionar outros métodos públicos (ex.: `available_points`, `calculate_*`); toda a API externa do serviço passa por `execute`. Lógica auxiliar e leituras internas ficam em métodos privados (`__nome`). Quando o resultado precisar de vários valores (antes/depois, flags, etc.), `execute` deve devolver uma **entidade de domínio** em `src/domain/entities/` com campos nomeados; o caso de uso (ou o endpoint) extrai só o necessário para a camada seguinte (ex.: um booleano para o body HTTP).
+- **Método público do serviço de domínio** (`src/domain/services/`): a classe deve expor **apenas um** método público: **`execute`**. Não adicionar outros métodos públicos (ex.: `available_points`, `calculate_*`); toda a API externa do serviço passa por `execute`. Lógica auxiliar e leituras internas ficam em métodos privados (`__nome`). Quando o resultado precisar de vários valores (antes/depois, flags, etc.), `execute` deve devolver uma **entidade de domínio** em `src/domain/schemas/entity/` com campos nomeados; o caso de uso (ou o endpoint) extrai só o necessário para a camada seguinte (ex.: um booleano para o body HTTP).
 - **Serviço de domínio em classe — `try`/`except` em `execute`:** sempre que o serviço for uma **classe**, o método público `execute` deve envolver o fluxo em `try`/`except` no padrão do projeto. No `try`, deve existir **apenas uma** invocação a um método privado (ex.: `return self.__execute(...)`, `self.__run(...)`), que concentra toda a orquestração; não colocar várias chamadas diretas no `try` de `execute`. No `except Exception as error:`: se `isinstance(error, BaseError)`, fazer `raise error`; caso contrário `raise InternalError(code=InternalErrorCodes.<NOME_ESPECIFICO_DO_SERVICO>_ERROR.code())`, registando um membro **único** em `src/domain/errors/codes/internal_error_codes.py` para esse serviço. Decorar `execute` com `@logging(show_args=True, show_return=True)` (de `src.infra.decorators.logger`).
 
 > **Nota:** código já existente pode ainda usar `execute` nos use cases; em **novos** use cases e em **refactors** que toquem o ficheiro, adotar `call` nos use cases e manter `execute` apenas nos serviços de domínio.
-
-### DTOs (schemas)
-
-- Em `src/application/schemas/`, com subpastas por recurso quando fizer sentido (ex.: `users/create_user_dto.py`, `auth/create_auth_dto.py`).
-- Usar `@dataclass` com campos tipados (ex.: `CreateUserDTO`, `UpdateUserDTO`, `CreateAuthDTO`).
-- Não usar Pydantic aqui; requests/responses da API é que são Pydantic.
-- **Paginação:** existe uma base genérica `PaginatedDto[T]` em `src/application/schemas/paginated_dto.py` com `items: list[T]`, `total`, `page`, `page_size`. DTOs de *resultado* de listagem paginada (ex.: `GetPaginatedChoresDto`) devem herdar de `PaginatedDto[Entity]` (ex.: `PaginatedDto[ChoreEntity]`). O repositório retorna esse DTO; o use case converte para o response da API.
 
 ### Use cases
 
@@ -231,10 +223,10 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 ### Testes de unidade (use cases, serviços de domínio e entidades)
 
 - **Obrigatório:** sempre que criar um **novo caso de uso** ou um **novo serviço de domínio**, criar também os **testes de unidade** correspondentes na mesma alteração.
-- **Entidades de domínio (`src/domain/entities/`):** também é **obrigatório** criar testes de unidade quando a entidade tiver **pelo menos um método** (além do construtor `__init__`). Ou seja: se a classe só tiver `__init__` e atributos (modelo de dados puro), **não** é obrigatório ficheiro de teste dedicado; se existir qualquer outro método (`validate_*`, `is_*`, `get_*`, etc.), criar `tests/unit/domain/entities/test_<nome_entidade_em_snake>.py` na mesma alteração, com **`unittest.TestCase`**, cobrindo **todos os ramos** desses métodos (sucesso e erros de domínio esperados).
+- **Entidades de domínio (`src/domain/schemas/entity/`):** também é **obrigatório** criar testes de unidade quando a entidade tiver **pelo menos um método** (além do construtor `__init__`). Ou seja: se a classe só tiver `__init__` e atributos (modelo de dados puro), **não** é obrigatório ficheiro de teste dedicado; se existir qualquer outro método (`validate_*`, `is_*`, `get_*`, etc.), criar `tests/unit/domain/schemas/entity/test_<nome_entidade_em_snake>.py` na mesma alteração, com **`unittest.TestCase`**, cobrindo **todos os ramos** desses métodos (sucesso e erros de domínio esperados).
 - Usar **`unittest`** (biblioteca padrão); **não** usar pytest. Cada ficheiro de teste deve ter **classes** que herdam de `unittest.TestCase`; os métodos de teste devem ser métodos da classe (ex.: `def test_cenario_sucesso(self):`).
 - **Reproduzir todos os cenários possíveis:** sucesso, erros de domínio (`BaseError`), erros inesperados que viram `InternalError`, ramificações condicionais, valores limite (ex.: lista vazia, None, listas com um elemento).
-- Espelhar a estrutura em `tests/unit/` (ex.: `tests/unit/domain/services/test_detect_new_reward_unlocked_service.py`, `tests/unit/domain/entities/test_chore_entity.py`, `tests/unit/application/usecases/chores/test_create_chore_use_case.py`).
+- Espelhar a estrutura em `tests/unit/` (ex.: `tests/unit/domain/services/test_detect_new_reward_unlocked_service.py`, `tests/unit/domain/schemas/entity/test_chore_entity.py`, `tests/unit/application/usecases/chores/test_create_chore_use_case.py`).
 - Dependências externas (repositórios, outros serviços) com **mocks** (`unittest.mock.Mock` / `MagicMock`). Para entidades, instanciar a entidade com dados de teste e chamar os métodos diretamente (sem mocks de repositório, salvo quando o método depender de outro objeto injetado).
 
 ---
@@ -261,8 +253,8 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 - Um ficheiro por agregado/entidade em `src/repositories/` (ex.: `user_repository.py` → `UserRepository`).
 - Construtor: `def __init__(self, db_session: Session)` e guardar em `self.db_session`.
 - Métodos de escrita (insert, update, delete) com parâmetro `commit: bool = True`; ao final, se `commit`, chamar `self.db_session.commit()`.
-- **O repositório nunca deve retornar `tuple`.** Para listas paginadas, o método deve retornar um DTO da camada de aplicação que herde de `PaginatedDto[T]` (ex.: `GetPaginatedChoresDto` que estende `PaginatedDto[ChoreEntity]` em `src/application/schemas/paginated_dto.py`). O DTO de resultado de paginação tem `items`, `total`, `page`, `page_size`; o use case recebe esse DTO e converte para o response da API.
-- **O repositório sempre deve retornar uma entidade do domínio e nunca o modelo do SQLAlchemy.** Usar DTOs da application na entrada (ex.: `CreateUserDTO`) e entidades na saída (ex.: `UserEntity | None`). Não expor models na API nem em use cases.
+- **O repositório nunca deve retornar `tuple`.** Para listas paginadas, o método deve retornar um DTO de domínio que herde de `PaginatedDto[T]` (ex.: `GetPaginatedChoresDto` em `src/domain/schemas/dto/chores/`, base `PaginatedDto` em `src/domain/schemas/dto/paginated_dto.py`). O DTO de resultado de paginação tem `items`, `total`, `page`, `page_size`; o use case recebe esse DTO e converte para o response da API.
+- **O repositório sempre deve retornar uma entidade do domínio e nunca o modelo do SQLAlchemy.** Usar DTOs de domínio na entrada (ex.: `CreateUserDTO`) e entidades na saída (ex.: `UserEntity | None`). Não expor models na API nem em use cases.
 - No máximo 3 parâmetros por método, criar DTO caso isso aconteça.
 - Em métodos de leitura, usar `model.to_entity() if model else None` (ou construir a entidade a partir do model). Em métodos que exigem existência (ex.: delete, update), lançar `NotFoundError` com o código apropriado quando não encontrar.
 - Queries com `self.db_session.query(Model).filter_by(...).first()` (ou equivalente). Para delete, pode usar `delete(Model).where(...)` e `execute` + `commit`.
@@ -310,15 +302,15 @@ def get_current_user(use_case: Annotated[GetCurrentUserUseCase, Depends(get_curr
 | Dependencies  | api/v1/dependencies/     | get_db → repositórios → use case; nome *_use_case |
 | Request/Resp  | api/v1/requests|responses/| Pydantic BaseModel, Field(..., examples=...); Response com from_entity se aplicável |
 | Docs          | api/v1/docs/errors/      | build_doc_errors_response por status e método |
-| Entity        | domain/entities/         | Classe simples, atributos tipados; se tiver métodos além de `__init__`, **+ testes em `tests/unit/domain/entities/`** |
+| Entity        | domain/schemas/entity/   | Classe simples, atributos tipados; se tiver métodos além de `__init__`, **+ testes em `tests/unit/domain/schemas/entity/`** |
 | Error         | domain/errors/           | BaseError(code), *ErrorCodes(BaseErrorCode), (code_int, message_str), .code() |
-| DTO           | application/schemas/     | @dataclass |
+| DTO           | domain/schemas/dto/      | @dataclass |
 | Use case      | application/usecases/    | **call()** (único público), @logging, try/except BaseError → InternalError |
 | Domain service| domain/services/         | **execute()** único público; `try` com **uma** chamada privada; `except` → BaseError relança senão InternalError + código único; `@logging` em `execute`; sem chamar use cases |
 | Repository    | repositories/            | Session no __init__, DTO in / Entity out, commit: bool = True |
 | Model         | repositories/models/     | Base, __tablename__, to_entity(), from_entity() se necessário |
 
-Ao criar um novo recurso (ex.: "tasks"), seguir esta ordem: entidade (se tiver métodos além de `__init__`, **testes da entidade**) → model + migration → repositório → DTOs → use cases → dependencies → requests/responses → error_docs → endpoints → registar router em router_v1.
+Ao criar um novo recurso (ex.: "tasks"), seguir esta ordem: entidade em `domain/schemas/entity/` (se tiver métodos além de `__init__`, **testes em `tests/unit/domain/schemas/entity/`**) → model + migration → repositório → DTOs em `domain/schemas/dto/` → use cases → dependencies → requests/responses → error_docs → endpoints → registar router em router_v1.
 
 ---
 

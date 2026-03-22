@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from src.domain.entities.achievement_entity import AchievementEntity
+from src.domain.schemas.entity.achievement_entity import AchievementEntity
 from src.repositories.models.achievement_model import AchievementModel
 
 

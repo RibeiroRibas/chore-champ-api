@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from src.domain.entities.user_entity import UserEntity
+from src.domain.schemas.entity.user_entity import UserEntity
 
 
 class FamilyMemberResponse(BaseModel):

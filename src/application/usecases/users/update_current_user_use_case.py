@@ -1,5 +1,5 @@
 from src.api.v1.requests.users.update_current_user_request import UpdateCurrentUserRequest
-from src.application.schemas.users.update_user_dto import UpdateUserDTO
+from src.domain.schemas.dto.users.update_user_dto import UpdateUserDTO
 from src.domain.errors.base_error import BaseError
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.internal_error import InternalError

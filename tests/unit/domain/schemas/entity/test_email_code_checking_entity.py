@@ -1,7 +1,7 @@
 import unittest
 from datetime import datetime, timedelta
 
-from src.domain.entities.email_code_checking_entity import EmailCodeCheckingEntity
+from src.domain.schemas.entity.email_code_checking_entity import EmailCodeCheckingEntity
 from src.domain.errors.unauthorized_error import UnauthorizedError
 
 

@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 
 from src.api.v1.responses.families.family_response import FamilyResponse
 from src.api.v1.responses.roles.role_response import RoleResponse
-from src.domain.entities.user_points_family_entity import UserPointsFamilyEntity
+from src.domain.schemas.entity.user_points_family_entity import UserPointsFamilyEntity
 
 
 class CurrentUserResponse(BaseModel):

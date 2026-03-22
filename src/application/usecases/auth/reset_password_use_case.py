@@ -1,6 +1,6 @@
 from src.api.v1.requests.auth.reset_password_request import ResetPasswordRequest
 from src.application.usecases.auth.validate_email_code_checking_use_case import ValidateEmailCodeCheckingUseCase
-from src.domain.entities.auth_entity import AuthEntity
+from src.domain.schemas.entity.auth_entity import AuthEntity
 from src.domain.errors.base_error import BaseError
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.codes.not_found_error_codes import NotFoundErrorCodes

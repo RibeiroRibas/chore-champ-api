@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from src.domain.entities.family_member_ranking_entity import FamilyMemberRankingEntity
+from src.domain.schemas.entity.family_member_ranking_entity import FamilyMemberRankingEntity
 
 
 class FamilyMemberRankingResponse(BaseModel):

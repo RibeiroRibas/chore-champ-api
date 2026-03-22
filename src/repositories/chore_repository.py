@@ -3,16 +3,16 @@ from datetime import datetime, timezone
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import Session
 
-from src.application.schemas.chores.create_chore_dto import CreateChoreDTO
-from src.application.schemas.chores.get_chores_filtered_dto import (
+from src.domain.schemas.dto.chores.create_chore_dto import CreateChoreDTO
+from src.domain.schemas.dto.chores.get_chores_filtered_dto import (
     GetChoresFilteredDto,
 )
-from src.application.schemas.chores.get_paginated_chores_dto import (
+from src.domain.schemas.dto.chores.get_paginated_chores_dto import (
     GetPaginatedChoresDto,
 )
-from src.application.schemas.chores.update_chore_dto import UpdateChoreDTO
-from src.domain.entities.chore_entity import ChoreEntity
-from src.domain.entities.chore_user_entity import ChoreUserEntity
+from src.domain.schemas.dto.chores.update_chore_dto import UpdateChoreDTO
+from src.domain.schemas.entity.chore_entity import ChoreEntity
+from src.domain.schemas.entity.chore_user_entity import ChoreUserEntity
 from src.domain.errors.codes.not_found_error_codes import NotFoundErrorCodes
 from src.domain.errors.not_found_error import NotFoundError
 from src.repositories.models.chore_model import ChoreModel

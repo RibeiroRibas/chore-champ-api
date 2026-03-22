@@ -1,10 +1,10 @@
 import unittest
 
-from src.domain.entities.family_entity import FamilyEntity
-from src.domain.entities.points_entity import PointsEntity
-from src.domain.entities.role_entity import RoleEntity
-from src.domain.entities.user_entity import UserEntity
-from src.domain.entities.user_points_family_entity import UserPointsFamilyEntity
+from src.domain.schemas.entity.family_entity import FamilyEntity
+from src.domain.schemas.entity.points_entity import PointsEntity
+from src.domain.schemas.entity.role_entity import RoleEntity
+from src.domain.schemas.entity.user_entity import UserEntity
+from src.domain.schemas.entity.user_points_family_entity import UserPointsFamilyEntity
 
 
 class TestUserPointsFamilyEntity(unittest.TestCase):

@@ -1,5 +1,5 @@
 from src.api.v1.responses.days_of_week.day_of_week_response import DayOfWeekResponse
-from src.domain.entities.day_of_week_entity import DayOfWeekEntity
+from src.domain.schemas.entity.day_of_week_entity import DayOfWeekEntity
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.internal_error import InternalError
 from src.repositories.day_of_week_repository import DayOfWeekRepository

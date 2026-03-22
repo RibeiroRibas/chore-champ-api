@@ -39,7 +39,7 @@ from src.application.usecases.chores.list_all_chores_use_case import ListAllChor
 from src.application.usecases.chores.list_today_chores_use_case import ListTodayChoresUseCase
 from src.application.usecases.chores.remove_assign_chore_to_me_use_case import RemoveAssignChoreToMeUseCase
 from src.application.usecases.chores.update_chore_use_case import UpdateChoreUseCase
-from src.domain.entities.current_user_entity import CurrentUserEntity
+from src.domain.schemas.entity.current_user_entity import CurrentUserEntity
 from src.infra.decorators.logger import request_logging
 
 router = APIRouter(prefix="/family/chores")

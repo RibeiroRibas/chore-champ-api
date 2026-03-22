@@ -3,12 +3,12 @@ from typing import List
 from sqlalchemy import Column, Integer, String, DateTime, func, ForeignKey
 from sqlalchemy.orm import relationship, Mapped
 
-from src.domain.entities.current_user_entity import CurrentUserEntity
-from src.domain.entities.user_auth_family_entity import UserAuthFamilyEntity
-from src.domain.entities.user_entity import UserEntity
-from src.domain.entities.user_family_entity import UserFamilyEntity
-from src.domain.entities.user_points_achievements_entity import UserPointsAchievementsEntity
-from src.domain.entities.user_points_family_entity import UserPointsFamilyEntity
+from src.domain.schemas.entity.current_user_entity import CurrentUserEntity
+from src.domain.schemas.entity.user_auth_family_entity import UserAuthFamilyEntity
+from src.domain.schemas.entity.user_entity import UserEntity
+from src.domain.schemas.entity.user_family_entity import UserFamilyEntity
+from src.domain.schemas.entity.user_points_achievements_entity import UserPointsAchievementsEntity
+from src.domain.schemas.entity.user_points_family_entity import UserPointsFamilyEntity
 from src.repositories.models import Base
 
 from src.repositories.models.chore_model import ChoreModel

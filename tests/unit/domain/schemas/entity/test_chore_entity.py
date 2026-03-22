@@ -1,7 +1,7 @@
 import unittest
 
-from src.domain.entities.chore_entity import ChoreEntity
-from src.domain.entities.current_user_entity import CurrentUserEntity
+from src.domain.schemas.entity.chore_entity import ChoreEntity
+from src.domain.schemas.entity.current_user_entity import CurrentUserEntity
 from src.domain.errors.bad_request_error import BadRequestError
 from src.domain.errors.unauthorized_error import UnauthorizedError
 from src.domain.enums.user_role_enum import UserRoleEnum

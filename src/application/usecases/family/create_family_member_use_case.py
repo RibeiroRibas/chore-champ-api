@@ -2,9 +2,9 @@ from collections.abc import Callable
 
 from src.api.v1.requests.users.create_family_member_request import CreateFamilyMemberRequest
 from src.api.v1.responses.users.family_member_response import FamilyMemberResponse
-from src.application.schemas.auth.create_auth_dto import CreateAuthDTO
-from src.application.schemas.users.create_user_dto import CreateUserDTO
-from src.domain.entities.role_entity import RoleEntity
+from src.domain.schemas.dto.auth.create_auth_dto import CreateAuthDTO
+from src.domain.schemas.dto.users.create_user_dto import CreateUserDTO
+from src.domain.schemas.entity.role_entity import RoleEntity
 from src.domain.errors.bad_request_error import BadRequestError
 from src.domain.errors.base_error import BaseError
 from src.domain.errors.codes.bad_request_error_codes import BadRequestErrorCode

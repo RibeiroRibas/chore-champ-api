@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from src.domain.entities.reward_entity import RewardEntity
+from src.domain.schemas.entity.reward_entity import RewardEntity
 
 
 class RewardResponse(BaseModel):

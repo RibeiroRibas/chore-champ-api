@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, func
 
-from src.domain.entities.auth_entity import AuthEntity
+from src.domain.schemas.entity.auth_entity import AuthEntity
 from src.repositories.models import Base
 
 

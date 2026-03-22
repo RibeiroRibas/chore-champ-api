@@ -1,4 +1,4 @@
-from src.domain.entities.current_user_entity import CurrentUserEntity
+from src.domain.schemas.entity.current_user_entity import CurrentUserEntity
 from src.domain.errors.codes.not_found_error_codes import NotFoundErrorCodes
 from src.domain.errors.not_found_error import NotFoundError
 from src.repositories.user_repository import UserRepository

@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import MagicMock
 
-from src.domain.entities.new_reward_unlock_check_entity import NewRewardUnlockCheckEntity
-from src.domain.entities.reward_entity import RewardEntity
+from src.domain.schemas.entity.new_reward_unlock_check_entity import NewRewardUnlockCheckEntity
+from src.domain.schemas.entity.reward_entity import RewardEntity
 from src.domain.errors.internal_error import InternalError
 from src.domain.services.detect_new_reward_unlocked_service import (
     DetectNewRewardUnlockedService,

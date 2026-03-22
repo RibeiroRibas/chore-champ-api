@@ -1,7 +1,7 @@
 import os
 
 from src.api.v1.requests.auth.create_auth_request import CreateAuthRequest
-from src.application.schemas.auth.create_auth_dto import CreateAuthDTO
+from src.domain.schemas.dto.auth.create_auth_dto import CreateAuthDTO
 from src.application.usecases.auth.validate_email_code_checking_use_case import ValidateEmailCodeCheckingUseCase
 from src.domain.errors.bad_request_error import BadRequestError
 from src.domain.errors.base_error import BaseError

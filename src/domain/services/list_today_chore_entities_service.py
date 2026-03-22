@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from src.domain.entities.chore_entity import ChoreEntity
-from src.domain.entities.recurring_chore_entity import RecurringChoreEntity
+from src.domain.schemas.entity.chore_entity import ChoreEntity
+from src.domain.schemas.entity.recurring_chore_entity import RecurringChoreEntity
 from src.domain.errors.base_error import BaseError
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.internal_error import InternalError

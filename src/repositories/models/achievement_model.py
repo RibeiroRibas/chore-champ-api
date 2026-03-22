@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, func
 
-from src.domain.entities.achievement_entity import AchievementEntity
+from src.domain.schemas.entity.achievement_entity import AchievementEntity
 from src.repositories.models import Base
 
 

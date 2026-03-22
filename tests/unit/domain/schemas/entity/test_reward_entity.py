@@ -1,6 +1,6 @@
 import unittest
 
-from src.domain.entities.reward_entity import RewardEntity
+from src.domain.schemas.entity.reward_entity import RewardEntity
 from src.domain.errors.bad_request_error import BadRequestError
 
 

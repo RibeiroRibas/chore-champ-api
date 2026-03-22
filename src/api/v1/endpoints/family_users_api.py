@@ -31,7 +31,7 @@ from src.application.usecases.family.resend_family_member_password_use_case impo
     ResendFamilyMemberPasswordUseCase,
 )
 from src.application.usecases.family.update_family_member_use_case import UpdateFamilyMemberUseCase
-from src.domain.entities.current_user_entity import CurrentUserEntity
+from src.domain.schemas.entity.current_user_entity import CurrentUserEntity
 from src.infra.decorators.logger import request_logging
 from src.infra.services.send_email_service import send_temp_password
 

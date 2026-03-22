@@ -1,5 +1,5 @@
-from src.domain.entities.chore_user_entity import ChoreUserEntity
-from src.domain.entities.current_user_entity import CurrentUserEntity
+from src.domain.schemas.entity.chore_user_entity import ChoreUserEntity
+from src.domain.schemas.entity.current_user_entity import CurrentUserEntity
 from src.domain.errors.base_error import BaseError
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.internal_error import InternalError

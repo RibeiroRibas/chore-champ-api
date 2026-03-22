@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from src.domain.entities.day_of_week_entity import DayOfWeekEntity
+from src.domain.schemas.entity.day_of_week_entity import DayOfWeekEntity
 from src.repositories.models.day_of_week_model import DayOfWeekModel
 
 

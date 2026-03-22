@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 
-from src.domain.entities.chore_entity import ChoreEntity
+from src.domain.schemas.entity.chore_entity import ChoreEntity
 from src.domain.errors.internal_error import InternalError
 from src.domain.errors.not_found_error import NotFoundError
 from src.domain.services.get_chore_service import GetChoreService

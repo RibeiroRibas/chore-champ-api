@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, func
 
-from src.domain.entities.refresh_token_entity import RefreshTokenEntity
+from src.domain.schemas.entity.refresh_token_entity import RefreshTokenEntity
 from src.repositories.models import Base
 
 

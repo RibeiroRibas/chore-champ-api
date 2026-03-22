@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, func, ForeignKey
 from sqlalchemy.orm import relationship
 
-from src.domain.entities.chore_entity import ChoreEntity
-from src.domain.entities.chore_user_entity import ChoreUserEntity
+from src.domain.schemas.entity.chore_entity import ChoreEntity
+from src.domain.schemas.entity.chore_user_entity import ChoreUserEntity
 from src.repositories.models import Base
 from src.repositories.models.recurring_chore_model import RecurringChoreModel
 

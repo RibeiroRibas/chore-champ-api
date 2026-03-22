@@ -1,6 +1,6 @@
-from src.domain.entities.achievement_entity import AchievementEntity
-from src.domain.entities.points_entity import PointsEntity
-from src.domain.entities.user_entity import UserEntity
+from src.domain.schemas.entity.achievement_entity import AchievementEntity
+from src.domain.schemas.entity.points_entity import PointsEntity
+from src.domain.schemas.entity.user_entity import UserEntity
 
 
 class UserPointsAchievementsEntity:

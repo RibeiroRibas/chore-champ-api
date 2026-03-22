@@ -1,4 +1,4 @@
-from src.domain.entities.chore_entity import ChoreEntity
+from src.domain.schemas.entity.chore_entity import ChoreEntity
 from src.domain.errors.base_error import BaseError
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.codes.not_found_error_codes import NotFoundErrorCodes

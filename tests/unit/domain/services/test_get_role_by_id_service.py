@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 
-from src.domain.entities.role_entity import RoleEntity
+from src.domain.schemas.entity.role_entity import RoleEntity
 from src.domain.errors.internal_error import InternalError
 from src.domain.errors.not_found_error import NotFoundError
 from src.domain.services.get_role_by_id_service import GetRoleByIdService

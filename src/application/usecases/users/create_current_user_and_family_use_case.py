@@ -1,5 +1,5 @@
 from src.api.v1.requests.users.create_current_user_request import CreateCurrentUserRequest
-from src.application.schemas.users.create_user_dto import CreateUserDTO
+from src.domain.schemas.dto.users.create_user_dto import CreateUserDTO
 from src.domain.enums.user_role_enum import UserRoleEnum
 from src.domain.errors.bad_request_error import BadRequestError
 from src.domain.errors.base_error import BaseError

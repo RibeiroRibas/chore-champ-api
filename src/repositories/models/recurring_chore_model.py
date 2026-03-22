@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, PrimaryKeyConstraint
 from sqlalchemy.orm import relationship
 
-from src.domain.entities.recurring_chore_entity import RecurringChoreEntity
+from src.domain.schemas.entity.recurring_chore_entity import RecurringChoreEntity
 from src.repositories.models import Base
 
 

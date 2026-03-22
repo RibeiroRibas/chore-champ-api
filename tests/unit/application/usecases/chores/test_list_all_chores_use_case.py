@@ -4,8 +4,8 @@ from unittest.mock import MagicMock
 from src.api.v1.requests.chores.get_chores_filtered_request import (
     GetChoresFilteredRequest,
 )
-from src.application.schemas.paginated_dto import PaginatedDto
-from src.domain.entities.chore_entity import ChoreEntity
+from src.domain.schemas.dto.paginated_dto import PaginatedDto
+from src.domain.schemas.entity.chore_entity import ChoreEntity
 from src.domain.errors.internal_error import InternalError
 from src.application.usecases.chores.list_all_chores_use_case import (
     ListAllChoresUseCase,

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
 
-from src.domain.entities.role_entity import RoleEntity
+from src.domain.schemas.entity.role_entity import RoleEntity
 from src.repositories.models import Base
 
 

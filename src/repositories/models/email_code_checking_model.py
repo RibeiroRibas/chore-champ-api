@@ -1,6 +1,6 @@
 from sqlalchemy import Boolean, Column, Integer, String, DateTime, func, SMALLINT
 
-from src.domain.entities.email_code_checking_entity import EmailCodeCheckingEntity
+from src.domain.schemas.entity.email_code_checking_entity import EmailCodeCheckingEntity
 from src.repositories.models import Base
 
 

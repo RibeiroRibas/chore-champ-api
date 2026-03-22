@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy import Column, Integer, String, DateTime, func
 from sqlalchemy.orm import relationship, Mapped
 
-from src.domain.entities.family_entity import FamilyEntity
+from src.domain.schemas.entity.family_entity import FamilyEntity
 from src.repositories.models import Base
 from src.repositories.models.chore_model import ChoreModel
 from src.repositories.models.user_model import UserModel

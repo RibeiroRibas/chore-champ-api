@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 
-from src.domain.entities.chore_entity import ChoreEntity
+from src.domain.schemas.entity.chore_entity import ChoreEntity
 from src.domain.errors.internal_error import InternalError
 from src.application.usecases.chores.list_today_chores_use_case import (
     ListTodayChoresUseCase,

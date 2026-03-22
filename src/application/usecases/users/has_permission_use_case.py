@@ -1,8 +1,8 @@
 from fastapi import Depends
 
 from src.api.middlewares.access_token_middleware import get_current_auth_id
-from src.domain.entities.current_user_entity import CurrentUserEntity
-from src.domain.entities.user_entity import UserEntity
+from src.domain.schemas.entity.current_user_entity import CurrentUserEntity
+from src.domain.schemas.entity.user_entity import UserEntity
 from src.domain.enums.user_role_enum import UserRoleEnum
 from src.domain.errors.codes.unauthorized_error_codes import UnauthorizedErrorCodes
 from src.domain.errors.unauthorized_error import UnauthorizedError

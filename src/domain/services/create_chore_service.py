@@ -1,10 +1,10 @@
-from src.application.schemas.chores.create_chore_dto import CreateChoreDTO
-from src.application.schemas.users.add_user_points_dto import AddUserPointsDTO
-from src.domain.entities.chore_entity import ChoreEntity
+from src.domain.schemas.dto.chores.create_chore_dto import CreateChoreDTO
+from src.domain.schemas.dto.users.add_user_points_dto import AddUserPointsDTO
+from src.domain.schemas.entity.chore_entity import ChoreEntity
 from src.domain.errors.base_error import BaseError
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.internal_error import InternalError
-from src.domain.schemas.recurring_chore_dto import RecurringChoreDTO
+from src.domain.schemas.dto.chores.recurring_chore_dto import RecurringChoreDTO
 from src.domain.services.detect_new_reward_unlocked_service import (
     DetectNewRewardUnlockedService,
 )

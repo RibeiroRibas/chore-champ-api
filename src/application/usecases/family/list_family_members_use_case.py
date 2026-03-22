@@ -1,5 +1,5 @@
 from src.api.v1.responses.users.family_member_response import FamilyMemberResponse
-from src.domain.entities.family_entity import FamilyEntity
+from src.domain.schemas.entity.family_entity import FamilyEntity
 from src.domain.errors.base_error import BaseError
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.internal_error import InternalError

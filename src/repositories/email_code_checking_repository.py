@@ -1,8 +1,8 @@
 from sqlalchemy import delete
 from sqlalchemy.orm import Session
 
-from src.application.schemas.create_email_code_checking_dto import CreateEmailCodeCheckingDTO
-from src.domain.entities.email_code_checking_entity import EmailCodeCheckingEntity
+from src.domain.schemas.dto.create_email_code_checking_dto import CreateEmailCodeCheckingDTO
+from src.domain.schemas.entity.email_code_checking_entity import EmailCodeCheckingEntity
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.internal_error import InternalError
 from src.repositories.models import EmailCodeCheckingModel

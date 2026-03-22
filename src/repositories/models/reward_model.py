@@ -1,7 +1,7 @@
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from src.domain.entities.reward_entity import RewardEntity
+from src.domain.schemas.entity.reward_entity import RewardEntity
 from src.repositories.models import Base
 
 

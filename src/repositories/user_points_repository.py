@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
-from src.application.schemas.users.create_user_points_dto import CreateUserPointsDTO
-from src.domain.entities.points_entity import PointsEntity
+from src.domain.schemas.dto.users.create_user_points_dto import CreateUserPointsDTO
+from src.domain.schemas.entity.points_entity import PointsEntity
 from src.domain.errors.codes.not_found_error_codes import NotFoundErrorCodes
 from src.domain.errors.not_found_error import NotFoundError
 from src.repositories.models.user_points_model import UserPointsModel

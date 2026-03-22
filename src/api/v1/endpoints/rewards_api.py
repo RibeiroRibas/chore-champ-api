@@ -26,7 +26,7 @@ from src.application.usecases.rewards.delete_reward_use_case import DeleteReward
 from src.application.usecases.rewards.get_reward_use_case import GetRewardUseCase
 from src.application.usecases.rewards.list_family_rewards_use_case import ListFamilyRewardsUseCase
 from src.application.usecases.rewards.update_reward_use_case import UpdateRewardUseCase
-from src.domain.entities.current_user_entity import CurrentUserEntity
+from src.domain.schemas.entity.current_user_entity import CurrentUserEntity
 from src.infra.decorators.logger import request_logging
 
 router = APIRouter(prefix="/family/rewards")

@@ -2,8 +2,8 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
-from src.application.schemas.auth.create_auth_dto import CreateAuthDTO
-from src.domain.entities.auth_entity import AuthEntity
+from src.domain.schemas.dto.auth.create_auth_dto import CreateAuthDTO
+from src.domain.schemas.entity.auth_entity import AuthEntity
 from src.domain.errors.codes.not_found_error_codes import NotFoundErrorCodes
 from src.domain.errors.not_found_error import NotFoundError
 from src.repositories.models.auth_model import AuthModel

@@ -1,5 +1,5 @@
 from src.api.v1.responses.users.current_user_response import CurrentUserResponse
-from src.domain.entities.user_points_family_entity import UserPointsFamilyEntity
+from src.domain.schemas.entity.user_points_family_entity import UserPointsFamilyEntity
 from src.domain.errors.base_error import BaseError
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.codes.not_found_error_codes import NotFoundErrorCodes

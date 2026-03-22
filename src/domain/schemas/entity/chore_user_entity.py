@@ -1,5 +1,5 @@
-from src.domain.entities.chore_entity import ChoreEntity
-from src.domain.entities.user_entity import UserEntity
+from src.domain.schemas.entity.chore_entity import ChoreEntity
+from src.domain.schemas.entity.user_entity import UserEntity
 
 
 class ChoreUserEntity:

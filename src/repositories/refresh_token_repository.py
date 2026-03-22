@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from src.domain.entities.refresh_token_entity import RefreshTokenEntity
+from src.domain.schemas.entity.refresh_token_entity import RefreshTokenEntity
 from src.repositories.models.refresh_token_model import RefreshTokenModel
 
 

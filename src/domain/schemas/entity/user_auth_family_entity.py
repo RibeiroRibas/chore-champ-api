@@ -1,6 +1,6 @@
-from src.domain.entities.auth_entity import AuthEntity
-from src.domain.entities.family_entity import FamilyEntity
-from src.domain.entities.user_entity import UserEntity
+from src.domain.schemas.entity.auth_entity import AuthEntity
+from src.domain.schemas.entity.family_entity import FamilyEntity
+from src.domain.schemas.entity.user_entity import UserEntity
 
 
 class UserAuthFamilyEntity:

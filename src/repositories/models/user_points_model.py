@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, ForeignKey
 
-from src.domain.entities.points_entity import PointsEntity
+from src.domain.schemas.entity.points_entity import PointsEntity
 from src.repositories.models import Base
 
 

@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session, joinedload
 
-from src.domain.entities.recurring_chore_entity import RecurringChoreEntity
-from src.domain.schemas.recurring_chore_dto import RecurringChoreDTO
+from src.domain.schemas.entity.recurring_chore_entity import RecurringChoreEntity
+from src.domain.schemas.dto.chores.recurring_chore_dto import RecurringChoreDTO
 from src.repositories.models.recurring_chore_model import RecurringChoreModel
 
 

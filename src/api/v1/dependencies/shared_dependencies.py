@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from src.api.middlewares.access_token_middleware import get_current_auth_id
 from src.application.usecases.users.has_permission_use_case import HasPermissionUseCase
-from src.domain.entities.current_user_entity import CurrentUserEntity
+from src.domain.schemas.entity.current_user_entity import CurrentUserEntity
 from src.domain.enums.user_role_enum import UserRoleEnum
 from src.domain.services import current_user_service
 from src.infra.database.database import get_db

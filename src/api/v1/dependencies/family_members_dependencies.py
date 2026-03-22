@@ -13,7 +13,7 @@ from src.application.usecases.family.resend_family_member_password_use_case impo
     ResendFamilyMemberPasswordUseCase,
 )
 from src.application.usecases.family.update_family_member_use_case import UpdateFamilyMemberUseCase
-from src.domain.entities.current_user_entity import CurrentUserEntity
+from src.domain.schemas.entity.current_user_entity import CurrentUserEntity
 from src.domain.enums.user_role_enum import UserRoleEnum
 from src.domain.services.get_role_by_id_service import GetRoleByIdService
 from src.domain.services.get_user_auth_family_service import GetUserAuthFamilyService

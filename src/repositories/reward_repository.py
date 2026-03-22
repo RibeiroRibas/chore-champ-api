@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 
-from src.application.schemas.rewards.create_reward_dto import CreateRewardDTO
-from src.application.schemas.rewards.update_reward_dto import UpdateRewardDTO
-from src.domain.entities.reward_entity import RewardEntity
+from src.domain.schemas.dto.rewards.create_reward_dto import CreateRewardDTO
+from src.domain.schemas.dto.rewards.update_reward_dto import UpdateRewardDTO
+from src.domain.schemas.entity.reward_entity import RewardEntity
 from src.domain.errors.codes.not_found_error_codes import NotFoundErrorCodes
 from src.domain.errors.not_found_error import NotFoundError
 from src.repositories.models.reward_model import RewardModel

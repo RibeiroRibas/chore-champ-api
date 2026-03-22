@@ -1,5 +1,5 @@
 
-from src.domain.entities.email_code_checking_entity import EmailCodeCheckingEntity
+from src.domain.schemas.entity.email_code_checking_entity import EmailCodeCheckingEntity
 from src.infra.decorators.logger import logging
 from src.domain.errors.base_error import BaseError
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes

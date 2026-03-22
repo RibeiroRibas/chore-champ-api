@@ -1,8 +1,8 @@
 from collections import Counter
 
 from src.api.v1.responses.achievements.achievement_response import AchievementResponse
-from src.domain.entities.achievement_entity import AchievementEntity
-from src.domain.entities.user_points_achievements_entity import UserPointsAchievementsEntity
+from src.domain.schemas.entity.achievement_entity import AchievementEntity
+from src.domain.schemas.entity.user_points_achievements_entity import UserPointsAchievementsEntity
 from src.domain.errors.base_error import BaseError
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.codes.not_found_error_codes import NotFoundErrorCodes

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
 
-from src.domain.entities.day_of_week_entity import DayOfWeekEntity
+from src.domain.schemas.entity.day_of_week_entity import DayOfWeekEntity
 from src.repositories.models import Base
 
 

@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 
-from src.domain.entities.user_family_entity import UserFamilyEntity
+from src.domain.schemas.entity.user_family_entity import UserFamilyEntity
 from src.domain.errors.internal_error import InternalError
 from src.domain.errors.not_found_error import NotFoundError
 from src.domain.services.get_user_family_service import GetUserFamilyService

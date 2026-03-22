@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import MagicMock
 
-from src.domain.entities.points_entity import PointsEntity
-from src.domain.entities.reward_entity import RewardEntity
+from src.domain.schemas.entity.points_entity import PointsEntity
+from src.domain.schemas.entity.reward_entity import RewardEntity
 from src.domain.errors.internal_error import InternalError
 from src.application.usecases.rewards.list_family_rewards_use_case import (
     ListFamilyRewardsUseCase,

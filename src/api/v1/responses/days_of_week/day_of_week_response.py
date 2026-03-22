@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from src.domain.entities.day_of_week_entity import DayOfWeekEntity
+from src.domain.schemas.entity.day_of_week_entity import DayOfWeekEntity
 
 
 class DayOfWeekResponse(BaseModel):

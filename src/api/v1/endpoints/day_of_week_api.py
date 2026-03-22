@@ -7,7 +7,7 @@ from src.api.v1.dependencies.day_of_week_dependencies import list_days_of_week_u
 from src.api.v1.dependencies.shared_dependencies import get_current_user_entity
 from src.api.v1.responses.days_of_week.day_of_week_response import DayOfWeekResponse
 from src.application.usecases.days_of_week.list_days_of_week_use_case import ListDaysOfWeekUseCase
-from src.domain.entities.current_user_entity import CurrentUserEntity
+from src.domain.schemas.entity.current_user_entity import CurrentUserEntity
 from src.infra.decorators.logger import request_logging
 
 router = APIRouter(prefix="/days-of-week")

@@ -1,9 +1,9 @@
 import unittest
 from unittest.mock import MagicMock
 
-from src.domain.entities.chore_entity import ChoreEntity
-from src.domain.entities.chore_user_entity import ChoreUserEntity
-from src.domain.entities.current_user_entity import CurrentUserEntity
+from src.domain.schemas.entity.chore_entity import ChoreEntity
+from src.domain.schemas.entity.chore_user_entity import ChoreUserEntity
+from src.domain.schemas.entity.current_user_entity import CurrentUserEntity
 from src.domain.errors.internal_error import InternalError
 from src.application.usecases.chores.delete_chore_use_case import DeleteChoreUseCase
 

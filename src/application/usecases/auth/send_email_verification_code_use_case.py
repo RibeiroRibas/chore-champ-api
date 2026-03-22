@@ -1,7 +1,7 @@
 import os
 import random
 
-from src.application.schemas.create_email_code_checking_dto import CreateEmailCodeCheckingDTO
+from src.domain.schemas.dto.create_email_code_checking_dto import CreateEmailCodeCheckingDTO
 from src.infra.decorators.logger import logging
 from src.domain.errors.bad_request_error import BadRequestError
 from src.domain.errors.base_error import BaseError
