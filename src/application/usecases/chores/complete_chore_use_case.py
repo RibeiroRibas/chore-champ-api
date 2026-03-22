@@ -94,7 +94,7 @@ class CompleteChoreUseCase:
         recurring_dto = RecurringChoreDTO(
             family_id=current_user.family_id,
             chore_id=chore_id,
-            day_of_the_week_ids=updated.recurrence_day_ids,
+            day_of_the_week_ids=[d.id for d in updated.recurrence_days],
             is_recurring=updated.is_recurring,
             is_chore_completed=True,
         )

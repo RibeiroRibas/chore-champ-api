@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from src.domain.entities.current_user_entity import CurrentUserEntity
+from src.domain.entities.day_of_week_entity import DayOfWeekEntity
 from src.domain.errors.bad_request_error import BadRequestError
 from src.domain.errors.codes.bad_request_error_codes import BadRequestErrorCode
 from src.domain.errors.codes.unauthorized_error_codes import UnauthorizedErrorCodes
@@ -19,7 +20,7 @@ class ChoreEntity:
         created_by_user_id: int,
         completed: bool,
         is_recurring: bool = False,
-        recurrence_day_ids: list[int] | None = None,
+        recurrence_days: list[DayOfWeekEntity] | None = None,
     ):
         self.id = chore_id
         self.family_id = family_id
@@ -30,7 +31,7 @@ class ChoreEntity:
         self.created_by_user_id = created_by_user_id
         self.completed = completed
         self.is_recurring = is_recurring
-        self.recurrence_day_ids = recurrence_day_ids or []
+        self.recurrence_days = recurrence_days or []
 
 
     def validate_can_update_or_delete(self):

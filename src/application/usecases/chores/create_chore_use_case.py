@@ -101,4 +101,3 @@ class CreateChoreUseCase:
             is_chore_completed=request.completed
         )
         self.recurring_chore_repository.insert_recurring_chores(dto=recurring_dto, commit=should_commit)
-        entity.recurrence_day_ids = request.recurrence_day_ids

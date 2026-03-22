@@ -53,7 +53,7 @@ class ChoreModel(Base):
             created_by_user_id=self.created_by_user_id,
             completed=self.completed,
             is_recurring=self.is_recurring,
-            recurrence_day_ids=[day.day_of_week.id for day in self.chore_days]
+            recurrence_days=[cd.day_of_week.to_entity() for cd in self.chore_days],
         )
 
     def to_chore_user_entity(self) -> ChoreUserEntity:

@@ -38,7 +38,7 @@ src/
 - Imports sempre absolutos com prefixo `src.` (ex.: `from src.domain.entities.user_entity import UserEntity`).
 - **Nunca usar imports dentro de métodos, funções ou blocos.** Todos os imports devem ficar no topo do ficheiro.
 - Nomes de arquivos e pastas em **snake_case**; classes em **PascalCase**.
-- **Sem comentários no código** (`#`, docstrings explicativas de bloco, etc.): não adicionar comentários no código-fonte. Preferir **nomes claros** (variáveis, funções, métodos, classes) que expliquem a intenção; extrair funções ou constantes com nomes descritivos em vez de comentar o “porquê” ou o “o quê”.
+- **Sem comentários no código (regra obrigatória para a IA):** não adicionar `#`, docstrings explicativas, nem comentários entre `"""` no meio do código. Não adicionar `description=` narrativo em `Field(...)` do Pydantic só para explicar o campo (usar `examples=` quando precisar de exemplo no OpenAPI ou omitir). Preferir **nomes claros** e funções extraídas em vez de comentar intenção.
 
 ---
 

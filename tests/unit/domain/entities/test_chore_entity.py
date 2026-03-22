@@ -42,7 +42,6 @@ class TestChoreEntity(unittest.TestCase):
             completed=completed,
         )
 
-    # validate_can_update_or_delete
     def test_validate_can_update_or_delete_does_not_raise_when_not_completed(self):
         chore = self._chore(completed=False)
         chore.validate_can_update_or_delete()
@@ -69,7 +68,6 @@ class TestChoreEntity(unittest.TestCase):
         with self.assertRaises(UnauthorizedError):
             chore.validate_has_update_permission(collaborator)
 
-    # validate_has_delete_permission
     def test_validate_has_delete_permission_admin_succeeds(self):
         chore = self._chore(created_by_user_id=99)
         admin = self._admin_user(user_id=1)
@@ -133,7 +131,6 @@ class TestChoreEntity(unittest.TestCase):
         with self.assertRaises(BadRequestError):
             chore.validate_can_remove_assignment(collaborator)
 
-    # validate_can_complete
     def test_validate_can_complete_raises_when_already_completed(self):
         chore = self._chore(completed=True, assigned_to_user_id=2)
         admin = self._admin_user()
@@ -178,7 +175,6 @@ class TestChoreEntity(unittest.TestCase):
         collaborator = self._collaborator_user(user_id=2)
         chore.validate_can_complete(collaborator, [chore])
 
-    # is_chore_in_today_list
     def test_is_chore_in_today_list_returns_true_when_present(self):
         chore = self._chore(chore_id=1)
         other = self._chore(chore_id=99)

@@ -61,7 +61,7 @@ class ListTodayChoreEntitiesService:
                         chore_id=recurring_for_today.chore_id,
                         family_id=family_id,
                     )
-                    recurring_chore.recurrence_day_ids = chore.recurrence_day_ids
+                    recurring_chore.recurrence_days = chore.recurrence_days
                     filtered_recurring_for_today.append(recurring_chore)
 
         return filtered_recurring_for_today

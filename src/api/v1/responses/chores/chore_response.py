@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+from src.api.v1.responses.days_of_week.day_of_week_response import DayOfWeekResponse
 from src.domain.entities.chore_entity import ChoreEntity
 
 
@@ -12,7 +13,7 @@ class ChoreResponse(BaseModel):
     created_by: int = Field(..., examples=[1])
     completed: bool = Field(..., examples=[False])
     is_recurring: bool = Field(default=False, examples=[False])
-    recurrence_day_ids: list[int] = Field(default_factory=list, examples=[[1, 3, 5]])
+    recurrence_days: list[DayOfWeekResponse] | None = Field(default=None)
 
     @staticmethod
     def from_entity(entity: ChoreEntity) -> "ChoreResponse":
@@ -25,5 +26,5 @@ class ChoreResponse(BaseModel):
             created_by=entity.created_by_user_id,
             completed=entity.completed,
             is_recurring=entity.is_recurring,
-            recurrence_day_ids=entity.recurrence_day_ids or [],
+            recurrence_days=[DayOfWeekResponse.from_entity(d) for d in entity.recurrence_days] if entity.is_recurring else None,
         )
