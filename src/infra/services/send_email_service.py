@@ -31,7 +31,6 @@ def send(template_str: str, email: str, subject: str):
         raise InternalError(code=InfraErrorCodes.SEND_EMAIL_ERROR.code())
 
 def send_temp_password(email: str, temp_password: str) -> None:
-    """Envia e-mail com senha temporária (para membros da família)."""
     rendered = render_template(
         message_variables={"temp_password": temp_password},
         template_name="send_temp_password_template.html",
