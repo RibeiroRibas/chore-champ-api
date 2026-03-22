@@ -31,25 +31,30 @@ class TestCurrentUserEntity(unittest.TestCase):
         user = self._collaborator_user()
         self.assertFalse(user.is_admin())
 
-    # validate_chore_create_assignee
-    def test_validate_chore_create_assignee_admin_succeeds_with_none(self):
+    # validate_chore_create_assignees
+    def test_validate_chore_create_assignees_admin_succeeds_with_empty_list(self):
         user = self._admin_user()
-        user.validate_chore_create_assignee(None)
+        user.validate_chore_create_assignees([])
 
-    def test_validate_chore_create_assignee_admin_succeeds_with_other_user(self):
+    def test_validate_chore_create_assignees_admin_succeeds_with_other_users(self):
         user = self._admin_user(user_id=1)
-        user.validate_chore_create_assignee(99)
+        user.validate_chore_create_assignees([99, 1])
 
-    def test_validate_chore_create_assignee_collaborator_succeeds_when_assigning_to_self(self):
+    def test_validate_chore_create_assignees_collaborator_succeeds_when_assigning_to_self(self):
         user = self._collaborator_user(user_id=2)
-        user.validate_chore_create_assignee(2)
+        user.validate_chore_create_assignees([2])
 
-    def test_validate_chore_create_assignee_collaborator_raises_when_assignee_none(self):
-        user = self._collaborator_user(user_id=2)
-        with self.assertRaises(BadRequestError):
-            user.validate_chore_create_assignee(None)
-
-    def test_validate_chore_create_assignee_collaborator_raises_when_assigning_to_other(self):
+    def test_validate_chore_create_assignees_collaborator_raises_when_empty(self):
         user = self._collaborator_user(user_id=2)
         with self.assertRaises(BadRequestError):
-            user.validate_chore_create_assignee(99)
+            user.validate_chore_create_assignees([])
+
+    def test_validate_chore_create_assignees_collaborator_raises_when_assigning_to_other(self):
+        user = self._collaborator_user(user_id=2)
+        with self.assertRaises(BadRequestError):
+            user.validate_chore_create_assignees([99])
+
+    def test_validate_chore_create_assignees_collaborator_raises_when_self_and_other(self):
+        user = self._collaborator_user(user_id=2)
+        with self.assertRaises(BadRequestError):
+            user.validate_chore_create_assignees([2, 99])

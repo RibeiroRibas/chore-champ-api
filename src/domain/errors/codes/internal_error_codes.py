@@ -44,3 +44,4 @@ class InternalErrorCodes(BaseErrorCode):
     RECURRING_CHORE_SERVICE_ERROR = (500339, "Recurring chore service error")
     LIST_TODAY_CHORE_ENTITIES_SERVICE_ERROR = (500340, "List today chore entities service error")
     DETECT_NEW_REWARD_UNLOCKED_SERVICE_ERROR = (500341, "Detect new reward unlocked service error")
+    CREATE_SINGLE_CHORE_SERVICE_ERROR = (500342, "Create single chore service error")

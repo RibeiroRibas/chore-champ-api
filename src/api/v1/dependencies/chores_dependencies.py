@@ -10,6 +10,7 @@ from src.application.usecases.chores.list_all_chores_use_case import ListAllChor
 from src.application.usecases.chores.list_today_chores_use_case import ListTodayChoresUseCase
 from src.application.usecases.chores.remove_assign_chore_to_me_use_case import RemoveAssignChoreToMeUseCase
 from src.application.usecases.chores.update_chore_use_case import UpdateChoreUseCase
+from src.domain.services.create_chore_service import CreateChoreService
 from src.domain.services.detect_new_reward_unlocked_service import (
     DetectNewRewardUnlockedService,
 )
@@ -54,11 +55,14 @@ def create_chore_use_case(db: Session = Depends(get_db)) -> CreateChoreUseCase:
         reward_repository=RewardRepository(db_session=db),
         user_points_repository=user_points_repository,
     )
-    return CreateChoreUseCase(
+    create_single_chore_service = CreateChoreService(
         chore_repository=chore_repository,
         recurring_chore_repository=recurring_chore_repository,
         save_user_points_service=save_user_points_service,
         detect_new_reward_unlocked_service=detect,
+    )
+    return CreateChoreUseCase(
+        create_chore_service=create_single_chore_service,
     )
 
 

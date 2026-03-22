@@ -86,7 +86,7 @@ def create_chore(
     request: CreateChoreRequest,
     use_case: Annotated[CreateChoreUseCase, Depends(create_chore_use_case)],
 ) -> ChoreRewardUnlockResponse:
-    new_reward_unlocked = use_case.execute(
+    new_reward_unlocked = use_case.call(
         request=request,
         current_user=current_user,
     )

@@ -13,10 +13,10 @@ class CurrentUserEntity:
     def is_admin(self) -> bool:
         return self.role_id == UserRoleEnum.ADMIN.value[0]
 
-    def validate_chore_create_assignee(self, assigned_to_user_id: int | None) -> None:
+    def validate_chore_create_assignees(self, assigned_to_user_ids: list[int]) -> None:
         if self.is_admin():
             return
-        if assigned_to_user_id is None or assigned_to_user_id != self.user_id:
+        if len(assigned_to_user_ids) != 1 or assigned_to_user_ids[0] != self.user_id:
             raise BadRequestError(
                 code=BadRequestErrorCode.COLLABORATOR_CREATE_CHORE_MUST_ASSIGN_TO_SELF.code()
             )
