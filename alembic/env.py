@@ -21,7 +21,7 @@ db_url = (
     f"{os.getenv('DATABASE_SCHEME')}://"
     f"{os.getenv('DATABASE_USER')}:{os.getenv('DATABASE_PASSWORD')}@"
     f"{os.getenv('DATABASE_HOST')}:{os.getenv('DATABASE_PORT')}/"
-    f"{os.getenv('DATABASE_NAME')}"
+    f"{os.getenv('DATABASE_NAME')}?sslmode=require"
 )
 config.set_main_option("sqlalchemy.url", db_url)
 

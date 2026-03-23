@@ -6,13 +6,13 @@ from src.repositories.models import Base
 
 
 class RewardModel(Base):
-    __tablename__ = "rewards"
+    __tablename__ = "c_rewards"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String, nullable=False)
     subtitle = Column(String, nullable=True)
     emoji = Column(String, nullable=False)
-    achievement_id = Column(Integer, ForeignKey("achievements.id"), nullable=False)
+    achievement_id = Column(Integer, ForeignKey("c_achievements.id"), nullable=False)
 
     achievement = relationship("AchievementModel", lazy="selectin")
 

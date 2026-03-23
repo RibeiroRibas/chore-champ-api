@@ -8,6 +8,7 @@ from sqlalchemy.orm import sessionmaker
 load_dotenv()
 
 def get_database_url() -> str:
+    database_name = os.getenv("UNIFIED_DATABASE_NAME") or os.getenv("DATABASE_NAME")
 
     return str(
         PostgresDsn.build(
@@ -16,7 +17,7 @@ def get_database_url() -> str:
             password=os.getenv("DATABASE_PASSWORD"),
             host=os.getenv("DATABASE_HOST"),
             port=int(os.getenv("DATABASE_PORT")),
-            path=os.getenv("DATABASE_NAME"),
+            path=database_name,
         )
     )
 

@@ -5,10 +5,10 @@ from src.repositories.models import Base
 
 
 class RefreshTokenModel(Base):
-    __tablename__ = "refresh_tokens"
+    __tablename__ = "c_refresh_tokens"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    auth_id = Column(Integer, ForeignKey("auth.id"), nullable=False)
+    auth_id = Column(Integer, ForeignKey("c_auth.id"), nullable=False)
     refresh_token = Column(String(36), nullable=False)
     created_at = Column(DateTime, server_default=func.now())
 

@@ -10,7 +10,7 @@ from src.repositories.models.user_model import UserModel
 
 
 class FamilyModel(Base):
-    __tablename__ = 'families'
+    __tablename__ = 'c_families'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)

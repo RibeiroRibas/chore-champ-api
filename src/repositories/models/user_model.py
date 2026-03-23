@@ -16,14 +16,14 @@ from src.repositories.models.user_achievement_model import UserAchievementModel
 
 
 class UserModel(Base):
-    __tablename__ = 'users'
+    __tablename__ = 'c_users'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
-    role_id = Column(Integer, ForeignKey('roles.id'), nullable=False)
+    role_id = Column(Integer, ForeignKey('c_roles.id'), nullable=False)
     phone_number = Column(String, nullable=False)
-    auth_id = Column(Integer, ForeignKey('auth.id'), nullable=False)
-    family_id = Column(Integer, ForeignKey('families.id'), nullable=False)
+    auth_id = Column(Integer, ForeignKey('c_auth.id'), nullable=False)
+    family_id = Column(Integer, ForeignKey('c_families.id'), nullable=False)
     avatar = Column(String, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now())

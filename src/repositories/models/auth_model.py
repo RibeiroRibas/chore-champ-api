@@ -5,7 +5,7 @@ from src.repositories.models import Base
 
 
 class AuthModel(Base):
-    __tablename__ = 'auth'
+    __tablename__ = 'c_auth'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String, nullable=False)

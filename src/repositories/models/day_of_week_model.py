@@ -5,7 +5,7 @@ from src.repositories.models import Base
 
 
 class DayOfWeekModel(Base):
-    __tablename__ = "days_of_week"
+    __tablename__ = "c_days_of_week"
 
     id = Column(Integer, primary_key=True, autoincrement=False)
     name = Column(String(20), nullable=False)

@@ -5,13 +5,13 @@ from src.repositories.models import Base
 
 
 class UserPointsModel(Base):
-    __tablename__ = "user_points"
+    __tablename__ = "c_user_points"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     total_points = Column(Integer, nullable=False)
-    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("c_users.id"), unique=True, nullable=False)
     points_redeemed = Column(Integer, nullable=False, default=0)
-    family_id = Column(Integer, ForeignKey("families.id"), nullable=False)
+    family_id = Column(Integer, ForeignKey("c_families.id"), nullable=False)
 
     def to_entity(self) -> PointsEntity:
         return PointsEntity(

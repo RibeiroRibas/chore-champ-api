@@ -5,7 +5,7 @@ from src.repositories.models import Base
 
 
 class AchievementModel(Base):
-    __tablename__ = "achievements"
+    __tablename__ = "c_achievements"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String, nullable=False)

@@ -6,12 +6,12 @@ from src.repositories.models import Base
 
 
 class RecurringChoreModel(Base):
-    __tablename__ = "recurring_chores"
+    __tablename__ = "c_recurring_chores"
 
-    chore_id = Column(Integer, ForeignKey("chores.id", ondelete="CASCADE"), nullable=False)
-    day_of_week_id = Column(Integer, ForeignKey("days_of_week.id"), nullable=False)
-    family_id = Column(Integer, ForeignKey('families.id'), nullable=False)
-    parent_chore_id = Column(Integer, ForeignKey("chores.id", ondelete="CASCADE"), nullable=True)
+    chore_id = Column(Integer, ForeignKey("c_chores.id", ondelete="CASCADE"), nullable=False)
+    day_of_week_id = Column(Integer, ForeignKey("c_days_of_week.id"), nullable=False)
+    family_id = Column(Integer, ForeignKey('c_families.id'), nullable=False)
+    parent_chore_id = Column(Integer, ForeignKey("c_chores.id", ondelete="CASCADE"), nullable=True)
 
     __table_args__ = (PrimaryKeyConstraint("chore_id", "day_of_week_id"),)
 

@@ -8,15 +8,15 @@ from src.repositories.models.recurring_chore_model import RecurringChoreModel
 
 
 class ChoreModel(Base):
-    __tablename__ = 'chores'
+    __tablename__ = 'c_chores'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    family_id = Column(Integer, ForeignKey('families.id'), nullable=False)
+    family_id = Column(Integer, ForeignKey('c_families.id'), nullable=False)
     title = Column(String, nullable=False)
     emoji = Column(String, nullable=False)
     points = Column(Integer, nullable=False)
-    assigned_to_user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
-    created_by_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    assigned_to_user_id = Column(Integer, ForeignKey('c_users.id'), nullable=True)
+    created_by_user_id = Column(Integer, ForeignKey('c_users.id'), nullable=False)
     completed = Column(Boolean, nullable=False, default=False)
     completed_at = Column(DateTime, nullable=True)
     is_recurring = Column(Boolean, nullable=False, default=False)

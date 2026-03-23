@@ -38,7 +38,7 @@ def upgrade() -> None:
     )
 
     achievements_t = table(
-        "achievements",
+        "c_achievements",
         column("id", sa.Integer()),
         column("title", sa.String()),
         column("description", sa.String()),
@@ -51,15 +51,15 @@ def upgrade() -> None:
         [
             {
                 "id": 1,
-                "title": "Primeiros passos",
-                "description": "Conclua sua primeira tarefa",
+                "title": "Aprendiz",
+                "description": "Conquiste 50 pontos",
                 "emoji": "⭐",
                 "required_points": 50,
             },
             {
                 "id": 2,
                 "title": "Mão amiga",
-                "description": "Conquiste 50 pontos",
+                "description": "Conquiste 100 pontos",
                 "emoji": "🤝",
                 "required_points": 100,
             },

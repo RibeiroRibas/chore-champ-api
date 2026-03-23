@@ -5,7 +5,7 @@ from src.repositories.models import Base
 
 
 class EmailCodeCheckingModel(Base):
-    __tablename__ = 'email_code_checking'
+    __tablename__ = 'c_email_code_checking'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     email = Column(String(100), unique=True, nullable=False, index=True)

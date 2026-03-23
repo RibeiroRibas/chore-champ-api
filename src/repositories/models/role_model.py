@@ -5,7 +5,7 @@ from src.repositories.models import Base
 
 
 class RoleModel(Base):
-    __tablename__ = 'roles'
+    __tablename__ = 'c_roles'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
