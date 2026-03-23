@@ -37,7 +37,7 @@ class CreateFamilyMemberUseCase:
             self,
             request: CreateFamilyMemberRequest,
             family_id: int,
-            send_email_async: Callable[[str, str]]
+            send_email_async: Callable[[str, str], None]
     ) -> FamilyMemberResponse:
         try:
             return self._create_member(request, family_id, send_email_async)
@@ -50,7 +50,7 @@ class CreateFamilyMemberUseCase:
             self,
             request: CreateFamilyMemberRequest,
             family_id: int,
-            send_email_async: Callable[[str, str]],
+            send_email_async: Callable[[str, str], None],
     ) -> FamilyMemberResponse:
         self.__validate_email_in_use(request)
 
