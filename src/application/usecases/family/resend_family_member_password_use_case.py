@@ -24,7 +24,7 @@ class ResendFamilyMemberPasswordUseCase:
         self,
         user_id: int,
         family_id: int,
-        send_email_async: Callable[[str, str]],
+        send_email_async: Callable[[str, str], None],
     ) -> None:
         try:
             self._resend_password(user_id, family_id, send_email_async)
@@ -37,7 +37,7 @@ class ResendFamilyMemberPasswordUseCase:
         self,
         user_id: int,
         family_id: int,
-        send_email_async: Callable[[str, str]],
+        send_email_async: Callable[[str, str], None],
     ) -> None:
         entity: UserAuthFamilyEntity = self.get_user_auth_family_service.execute(user_id, family_id)
 
