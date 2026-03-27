@@ -63,6 +63,23 @@ class ChoreRepository:
         models: list[ChoreModel] = query.all()
         return [m.to_entity() for m in models]
 
+    def find_chore_for_today_by_id(self, chore_id: int, family_id: int) -> ChoreEntity | None:
+        model: ChoreModel | None = (
+            self.db_session.query(ChoreModel)
+            .filter_by(id=chore_id, family_id=family_id)
+            .filter(
+                or_(
+                    ChoreModel.completed.is_(False),
+                    and_(
+                        ChoreModel.completed.is_(True),
+                        func.date(ChoreModel.completed_at) == func.current_date(),
+                    ),
+                )
+            )
+            .first()
+        )
+        return model.to_entity() if model else None
+
     def find_paginated(
         self,
         family_id: int,

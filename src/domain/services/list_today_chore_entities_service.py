@@ -47,22 +47,44 @@ class ListTodayChoreEntitiesService:
 
         return self.__filter_recurring_for_today(all_recurring_for_today, family_id, recurring)
 
-    def __filter_recurring_for_today(self, all_recurring_for_today: list[RecurringChoreEntity], family_id: int,
-                                     recurring: list[ChoreEntity]) -> list[ChoreEntity]:
+    def __filter_recurring_for_today(
+        self,
+        all_recurring_for_today: list[RecurringChoreEntity],
+        family_id: int,
+        recurring: list[ChoreEntity],
+    ) -> list[ChoreEntity]:
+        by_id: dict[int, ChoreEntity] = {c.id: c for c in recurring}
         filtered_recurring_for_today: list[ChoreEntity] = []
-        for recurring_for_today in all_recurring_for_today:
-            for recurring_chore in recurring:
-                if recurring_chore.id == recurring_for_today.chore_id:
-                    if not recurring_for_today.parent_chore_id:
-                        filtered_recurring_for_today.append(recurring_chore)
+        seen: set[int] = set()
 
-                if recurring_chore.id == recurring_for_today.parent_chore_id:
-                    chore = self.__chore_repository.find_by_id(
-                        chore_id=recurring_for_today.chore_id,
-                        family_id=family_id,
-                    )
-                    recurring_chore.recurrence_days = chore.recurrence_days
-                    filtered_recurring_for_today.append(recurring_chore)
+        for row in all_recurring_for_today:
+            if row.parent_chore_id is None:
+                chore = by_id.get(row.chore_id) or self.__chore_repository.find_chore_for_today_by_id(
+                    row.chore_id, family_id
+                )
+                if chore is None or chore.id in seen:
+                    continue
+                seen.add(chore.id)
+                filtered_recurring_for_today.append(chore)
+                continue
+
+            parent = by_id.get(row.parent_chore_id) or self.__chore_repository.find_chore_for_today_by_id(
+                row.parent_chore_id, family_id
+            )
+            if parent is None:
+                continue
+
+            copy = self.__chore_repository.find_by_id(
+                chore_id=row.chore_id,
+                family_id=family_id,
+            )
+            if copy:
+                parent.recurrence_days = copy.recurrence_days
+
+            if parent.id in seen:
+                continue
+            seen.add(parent.id)
+            filtered_recurring_for_today.append(parent)
 
         return filtered_recurring_for_today
 

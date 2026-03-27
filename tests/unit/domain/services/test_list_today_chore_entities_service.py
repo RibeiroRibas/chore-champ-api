@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from src.domain.schemas.entity.chore_entity import ChoreEntity
+from src.domain.schemas.entity.day_of_week_entity import DayOfWeekEntity
 from src.domain.schemas.entity.recurring_chore_entity import RecurringChoreEntity
 from src.domain.errors.internal_error import InternalError
 from src.domain.services.list_today_chore_entities_service import (
@@ -85,6 +86,54 @@ class TestListTodayChoreEntitiesService(unittest.TestCase):
             self.mock_chore_repo.find_by_id.return_value = child_chore
             result = self.service.execute(family_id=1)
             self.assertGreater(len(result), 0)
+
+    def test_execute_includes_completed_recurring_parent_when_not_in_initial_page(
+        self,
+    ):
+        child_only = ChoreEntity(
+            chore_id=2,
+            family_id=1,
+            title="Cópia",
+            emoji="🔄",
+            points=3,
+            assigned_to_user_id=None,
+            created_by_user_id=1,
+            completed=False,
+            is_recurring=True,
+        )
+        parent_completed = ChoreEntity(
+            chore_id=1,
+            family_id=1,
+            title="Pai",
+            emoji="🔄",
+            points=3,
+            assigned_to_user_id=None,
+            created_by_user_id=1,
+            completed=True,
+            is_recurring=True,
+        )
+        rec_entity = RecurringChoreEntity(
+            chore_id=2,
+            day_of_week=DayOfWeekEntity(6, "Sábado"),
+            parent_chore_id=1,
+        )
+        self.mock_chore_repo.find_today_chore_by_family_id.return_value = [child_only]
+        self.mock_chore_repo.find_chore_for_today_by_id.side_effect = lambda cid, fid: (
+            parent_completed if cid == 1 else None
+        )
+        self.mock_chore_repo.find_by_id.return_value = child_only
+        with patch(
+            "src.domain.services.list_today_chore_entities_service.datetime"
+        ) as mock_dt:
+            mock_dt.now.return_value.weekday.return_value = 5
+            self.mock_recurring_repo.find_by_parent_chore_id_and_day.return_value = [
+                rec_entity
+            ]
+            result = self.service.execute(family_id=1)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0].id, 1)
+        self.assertTrue(result[0].completed)
+        self.mock_chore_repo.find_chore_for_today_by_id.assert_called()
 
     def test_execute_reraises_base_error(self):
         from src.domain.errors.bad_request_error import BadRequestError
