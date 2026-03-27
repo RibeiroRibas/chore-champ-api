@@ -22,7 +22,7 @@ app.include_router(router_v1, prefix='/api')
 add_error_handler(app)
 
 if __name__ == "__main__":
-    config = Config(app=app, host="0.0.0.0", port=8080, log_level="info")
+    config = Config(app=app, host="0.0.0.0", port=8008, log_level="info")
     server = Server(config)
 
     loop = asyncio.new_event_loop()
