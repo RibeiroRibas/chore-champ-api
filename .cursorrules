@@ -48,7 +48,7 @@ src/
 - FastAPI app com CORS (allow_origins=["*"], allow_credentials=True, allow_methods/headers=["*"]).
 - Router da API: `app.include_router(router_v1, prefix='/api')`.
 - Registrar error handler: `add_error_handler(app)`.
-- Uso de uvicorn com `Config` e `Server` para `if __name__ == "__main__"` (host 0.0.0.0, port 8080).
+- Uso de uvicorn com `Config` e `Server` para `if __name__ == "__main__"` (host 0.0.0.0, port 8008).
 
 ---
 
