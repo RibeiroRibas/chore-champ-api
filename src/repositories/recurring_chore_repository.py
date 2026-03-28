@@ -1,7 +1,9 @@
-from sqlalchemy.orm import Session, joinedload
+from datetime import datetime
 
-from src.domain.schemas.entity.recurring_chore_entity import RecurringChoreEntity
+from sqlalchemy.orm import Session
+
 from src.domain.schemas.dto.chores.recurring_chore_dto import RecurringChoreDTO
+from src.domain.schemas.entity.recurring_chore_entity import RecurringChoreEntity
 from src.repositories.models.recurring_chore_model import RecurringChoreModel
 
 
@@ -12,12 +14,13 @@ class RecurringChoreRepository:
     def insert_recurring_chores(self, dto: RecurringChoreDTO, commit: bool = True) -> None:
         if not dto.day_of_the_week_ids:
             return
+        current_week_day: int = datetime.today().weekday() + 1
         for day_of_the_week_id in dto.day_of_the_week_ids:
             model = RecurringChoreModel(
                 chore_id=dto.chore_id,
                 family_id=dto.family_id,
                 day_of_week_id=day_of_the_week_id,
-                parent_chore_id=dto.parent_chore_id,
+                completed_at=datetime.now() if current_week_day == day_of_the_week_id and dto.is_chore_completed else None,
             )
             self.db_session.add(model)
         if commit:
@@ -25,59 +28,60 @@ class RecurringChoreRepository:
         else:
             self.db_session.flush()
 
-    def delete_by_chore_id(self, chore_id: int, family_id: int, commit: bool = True) -> None:
-        models = (
+    def delete_by_day_of_the_week_ids(self, chore_id: int, day_of_the_week_ids: list[int], family_id: int,
+                                      commit: bool = True):
+        if not day_of_the_week_ids:
+            return
+        q = (
             self.db_session.query(RecurringChoreModel)
-            .filter_by(chore_id=chore_id, family_id=family_id)
-            .all()
+            .filter(
+                RecurringChoreModel.chore_id == chore_id,
+                RecurringChoreModel.family_id == family_id,
+                RecurringChoreModel.day_of_week_id.in_(day_of_the_week_ids),
+            )
         )
-        for model in models:
-            self.db_session.delete(model)
-        if commit and models:
+        q.delete(synchronize_session=False)
+        if commit:
             self.db_session.commit()
-        elif models:
+        else:
             self.db_session.flush()
 
-    def find_by_parent_chore_id_and_day(
-        self, family_id: int, day_of_week_id: int
-    ) -> list[RecurringChoreEntity]:
-        models: list[RecurringChoreModel] = (
-            self.db_session.query(RecurringChoreModel)
-            .options(joinedload(RecurringChoreModel.day_of_week))
-            .filter(
-                RecurringChoreModel.family_id == family_id,
-                RecurringChoreModel.day_of_week_id == day_of_week_id,
-            )
-            .all()
-        )
-        return [m.to_entity() for m in models]
+    def find_by_chore_id(self, chore_id: int, family_id: int) -> list[RecurringChoreEntity] | None:
+        rows: list[RecurringChoreModel] = (self.db_session.query(RecurringChoreModel)
+                                           .filter_by(chore_id=chore_id)
+                                           .filter_by(family_id=family_id)
+                                           .all())
+        return [row.to_entity() for row in rows] if rows else None
 
-    def find_chore_ids_done_for_day(
-        self, family_id: int, day_of_week_id: int
-    ) -> list[int]:
-        """Chore IDs das cópias já feitas no dia (parent_chore_id preenchido)."""
-        rows = (
-            self.db_session.query(RecurringChoreModel.chore_id)
-            .filter(
-                RecurringChoreModel.family_id == family_id,
-                RecurringChoreModel.day_of_week_id == day_of_week_id,
-                RecurringChoreModel.parent_chore_id.isnot(None),
-            )
-            .all()
-        )
-        return [r[0] for r in rows]
+    def update_to_complete_by_day_of_week_id(self, chore_id: int, family_id: int, day_of_the_week_id: int,
+                                             commit: bool = True):
+        model: RecurringChoreModel | None = (self.db_session.query(RecurringChoreModel)
+                                             .filter_by(chore_id=chore_id)
+                                             .filter_by(family_id=family_id)
+                                             .filter_by(day_of_week_id=day_of_the_week_id)
+                                             .first())
 
-    def find_by_chore_id_and_day(
-        self, chore_id: int, day_of_week_id: int, family_id: int
-    ) -> RecurringChoreEntity | None:
-        model = (
+        if not model:
+            return
+
+        model.completed_at = datetime.now()
+        self.db_session.merge(model)
+
+        if commit:
+            self.db_session.commit()
+        else:
+            self.db_session.flush()
+
+    def delete_by_chore_id(self, chore_id: int, family_id: int, commit: bool = True):
+        q = (
             self.db_session.query(RecurringChoreModel)
-            .options(joinedload(RecurringChoreModel.day_of_week))
             .filter(
                 RecurringChoreModel.family_id == family_id,
-                RecurringChoreModel.day_of_week_id == day_of_week_id,
                 RecurringChoreModel.chore_id == chore_id,
             )
-            .first()
         )
-        return model.to_entity() if model else None
+        q.delete(synchronize_session=False)
+        if commit:
+            self.db_session.commit()
+        else:
+            self.db_session.flush()

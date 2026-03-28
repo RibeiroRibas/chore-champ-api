@@ -16,11 +16,8 @@ class BadRequestErrorCode(BaseErrorCode):
     ASSIGNED_TO_USER_ID_REQUIRED = (400311, "Assigned to user id is required")
     REWARD_NOT_UNLOCKED = (400312, "Reward is locked for current user")
     ONLY_ADMIN_CAN_REMOVE_CHORE_ASSIGNMENT = (400313, "Only family admins can remove chore assignment")
-    COLLABORATOR_CAN_ONLY_COMPLETE_TODAY_CHORES = (
-        400314,
-        "Collaborators can only complete chores that appear in today's list",
-    )
-    COLLABORATOR_CREATE_CHORE_MUST_ASSIGN_TO_SELF = (
-        400315,
-        "Collaborators can only create chores assigned to themselves",
-    )
+    COLLABORATOR_CAN_ONLY_COMPLETE_TODAY_CHORES = (400314,"Collaborators can only complete chores that appear in today's list",)
+    COLLABORATOR_CREATE_CHORE_MUST_ASSIGN_TO_SELF = (400315,"Collaborators can only create chores assigned to themselves",)
+    RECURRING_CHORE_CAN_ONLY_BE_COMPLETED_TODAY = (400316, "Recurring chore can only be completed today.")
+    CAN_NOT_CREATE_COMPLETED_RECURRING = (400317, "Can not create completed recurring chore")
+    CHORE_CAN_ONLY_BE_COMPLETED_TODAY = (400318, "Chore can only be completed today")

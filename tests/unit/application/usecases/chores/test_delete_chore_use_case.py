@@ -12,9 +12,11 @@ class TestDeleteChoreUseCase(unittest.TestCase):
     def setUp(self):
         self.mock_repo = MagicMock()
         self.mock_get_chore_user = MagicMock()
+        self.mock_recurring_service = MagicMock()
         self.use_case = DeleteChoreUseCase(
             chore_repository=self.mock_repo,
             get_chore_user_service=self.mock_get_chore_user,
+            recurring_chore_service=self.mock_recurring_service,
         )
 
     def _current_user(self, user_id=1, family_id=2, role_id=1):
@@ -40,6 +42,26 @@ class TestDeleteChoreUseCase(unittest.TestCase):
         self.mock_get_chore_user.execute.return_value = chore_user
         current_user = self._current_user(user_id=1, family_id=2)
         self.use_case.execute(chore_id=1, current_user=current_user)
+        self.mock_repo.delete_by_id.assert_called_once_with(1, 2)
+        self.mock_recurring_service.execute.assert_not_called()
+
+    def test_execute_deletes_recurring_invokes_recurring_service(self):
+        chore = ChoreEntity(
+            chore_id=1,
+            family_id=2,
+            title="Tarefa",
+            emoji="🧹",
+            points=5,
+            assigned_to_user_id=None,
+            created_by_user_id=1,
+            completed=False,
+            is_recurring=True,
+        )
+        chore_user = ChoreUserEntity(user_entity=None, chore=chore)
+        self.mock_get_chore_user.execute.return_value = chore_user
+        current_user = self._current_user(user_id=1, family_id=2)
+        self.use_case.execute(chore_id=1, current_user=current_user)
+        self.mock_recurring_service.execute.assert_called_once()
         self.mock_repo.delete_by_id.assert_called_once_with(1, 2)
 
     def test_execute_reraises_base_error(self):

@@ -15,6 +15,7 @@ from src.domain.schemas.entity.chore_entity import ChoreEntity
 from src.domain.schemas.entity.chore_user_entity import ChoreUserEntity
 from src.domain.errors.codes.not_found_error_codes import NotFoundErrorCodes
 from src.domain.errors.not_found_error import NotFoundError
+from src.repositories.models import RecurringChoreModel
 from src.repositories.models.chore_model import ChoreModel
 
 
@@ -43,42 +44,41 @@ class ChoreRepository:
             self.db_session.flush()
         return model.to_entity()
 
-
-    def find_today_chore_by_family_id(self, family_id: int, limit: int = 30) -> list[ChoreEntity]:
+    def find_today_chores(self, family_id: int, current_week_day: int) -> list[ChoreEntity]:
         query = (
             self.db_session.query(ChoreModel)
-            .filter_by(family_id=family_id)
+            .outerjoin(
+                RecurringChoreModel,
+                and_(
+                    RecurringChoreModel.chore_id == ChoreModel.id,
+                    RecurringChoreModel.family_id == family_id,
+                ),
+            )
+            .filter(ChoreModel.family_id == family_id)
             .filter(
                 or_(
-                    ChoreModel.completed.is_(False),
+                    and_(
+                        ChoreModel.completed.is_(False),
+                        ChoreModel.is_recurring.is_(False),
+                    ),
                     and_(
                         ChoreModel.completed.is_(True),
                         func.date(ChoreModel.completed_at) == func.current_date(),
+                    ),
+                    and_(
+                        ChoreModel.is_recurring.is_(True),
+                        ChoreModel.completed.is_(False),
+                        RecurringChoreModel.day_of_week_id == current_week_day,
+                        or_(RecurringChoreModel.completed_at.is_(None),
+                            func.date(RecurringChoreModel.completed_at) != func.current_date()),
                     ),
                 )
             )
             .order_by(ChoreModel.created_at.desc())
-            .limit(limit)
         )
         models: list[ChoreModel] = query.all()
         return [m.to_entity() for m in models]
 
-    def find_chore_for_today_by_id(self, chore_id: int, family_id: int) -> ChoreEntity | None:
-        model: ChoreModel | None = (
-            self.db_session.query(ChoreModel)
-            .filter_by(id=chore_id, family_id=family_id)
-            .filter(
-                or_(
-                    ChoreModel.completed.is_(False),
-                    and_(
-                        ChoreModel.completed.is_(True),
-                        func.date(ChoreModel.completed_at) == func.current_date(),
-                    ),
-                )
-            )
-            .first()
-        )
-        return model.to_entity() if model else None
 
     def find_paginated(
         self,
@@ -163,20 +163,6 @@ class ChoreRepository:
 
         return model.to_chore_user_entity() if model else None
 
-    def exists_incomplete_copy_for_template_and_day(
-        self, parent_recurring_chore_id: int, recurrence_day_of_week_id: int
-    ) -> bool:
-        return (
-            self.db_session.query(ChoreModel.id)
-            .filter(
-                ChoreModel.parent_recurring_chore_id == parent_recurring_chore_id,
-                ChoreModel.recurrence_day_of_week_id == recurrence_day_of_week_id,
-                ChoreModel.completed.is_(False),
-            )
-            .first()
-            is not None
-        )
-
     def insert_copy(self, source_entity: ChoreEntity, commit: bool = True) -> ChoreEntity:
         new_model = ChoreModel(
             family_id=source_entity.family_id,
@@ -185,8 +171,8 @@ class ChoreRepository:
             points=source_entity.points,
             assigned_to_user_id=source_entity.assigned_to_user_id,
             created_by_user_id=source_entity.created_by_user_id,
-            completed=False,
-            is_recurring=source_entity.is_recurring
+            completed=True,
+            is_recurring=False
         )
         self.db_session.add(new_model)
         self.db_session.flush()

@@ -11,12 +11,12 @@ from src.domain.services.create_chore_service import CreateChoreService
 class TestCreateChoreService(unittest.TestCase):
     def setUp(self):
         self.mock_chore_repo = MagicMock()
-        self.mock_recurring_repo = MagicMock()
+        self.mock_recurring_service = MagicMock()
         self.mock_save_points = MagicMock()
         self.mock_detect = MagicMock()
         self.service = CreateChoreService(
             chore_repository=self.mock_chore_repo,
-            recurring_chore_repository=self.mock_recurring_repo,
+            recurring_chore_service=self.mock_recurring_service,
             save_user_points_service=self.mock_save_points,
             detect_new_reward_unlocked_service=self.mock_detect,
         )
@@ -59,7 +59,7 @@ class TestCreateChoreService(unittest.TestCase):
         new_reward_unlocked = self.service.execute(dto)
         self.assertFalse(new_reward_unlocked)
         self.mock_chore_repo.insert.assert_called_once()
-        self.mock_recurring_repo.insert_recurring_chores.assert_not_called()
+        self.mock_recurring_service.execute.assert_not_called()
         self.mock_detect.execute.assert_not_called()
 
     def test_execute_inserts_recurring_when_recurring(self):
@@ -67,10 +67,14 @@ class TestCreateChoreService(unittest.TestCase):
         self.mock_chore_repo.insert.return_value = self._entity()
         new_reward_unlocked = self.service.execute(dto)
         self.assertFalse(new_reward_unlocked)
-        self.mock_recurring_repo.insert_recurring_chores.assert_called_once()
+        self.mock_recurring_service.execute.assert_called_once()
+        passed = self.mock_recurring_service.execute.call_args.kwargs["dto"]
+        self.assertEqual(passed.chore_id, 99)
+        self.assertEqual(passed.day_of_the_week_ids, [1, 2])
+        self.assertTrue(passed.is_recurring)
 
     def test_execute_detects_reward_when_completed_with_assignee(self):
-        dto = self._dto(assigned_to_user_id=5, completed=True)
+        dto = self._dto(assigned_to_user_id=1, completed=True)
         self.mock_chore_repo.insert.return_value = self._entity()
 
         def detect_side_effect(user_id, mutate_points):

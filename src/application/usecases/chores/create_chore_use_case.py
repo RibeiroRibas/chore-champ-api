@@ -12,7 +12,7 @@ from src.infra.decorators.logger import logging
 
 class CreateChoreUseCase:
     def __init__(self, create_chore_service: CreateChoreService):
-        self.__create_single_chore_service = create_chore_service
+        self.__create_chore_service = create_chore_service
 
     @logging(show_args=True, show_return=True)
     def call(self, request: CreateChoreRequest, current_user: CurrentUserEntity) -> bool:
@@ -29,15 +29,19 @@ class CreateChoreUseCase:
         ):
             raise BadRequestError(code=BadRequestErrorCode.RECURRENCE_DAY_IDS_REQUIRED.code())
 
+        if request.is_recurring and request.completed:
+            raise BadRequestError(code=BadRequestErrorCode.CAN_NOT_CREATE_COMPLETED_RECURRING.code())
+
         assignee_ids = list(dict.fromkeys(request.assigned_to_user_ids))
         current_user.validate_chore_create_assignees(assignee_ids)
 
         reward_unlocked_response = False
         if len(assignee_ids) == 0:
-            reward_unlocked_response = self.__create_chore(request, current_user, None)
+            reward_unlocked_response = self.__create_chore(request, current_user)
         else:
             for uid in assignee_ids:
-                reward_unlocked = self.__create_chore(request, current_user, uid)
+                should_commit = assignee_ids[len(assignee_ids) -1] == uid
+                reward_unlocked = self.__create_chore(request, current_user, uid, should_commit)
                 reward_unlocked_response = reward_unlocked_response or reward_unlocked
 
         return reward_unlocked_response
@@ -46,7 +50,8 @@ class CreateChoreUseCase:
         self,
         request: CreateChoreRequest,
         current_user: CurrentUserEntity,
-        assigned_to_user_id: int | None,
+        assigned_to_user_id: int | None = None,
+        should_commit: bool = True,
     ) -> bool:
         dto = CreateChoreDTO(
             family_id=current_user.family_id,
@@ -59,4 +64,4 @@ class CreateChoreUseCase:
             is_recurring=request.is_recurring,
             recurrence_day_ids=request.recurrence_day_ids,
         )
-        return self.__create_single_chore_service.execute(dto)
+        return self.__create_chore_service.execute(dto, should_commit)
