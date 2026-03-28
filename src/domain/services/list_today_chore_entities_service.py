@@ -19,15 +19,30 @@ class ListTodayChoreEntitiesService:
         self.__recurring_chore_repository = recurring_chore_repository
 
     @logging(show_args=True, show_return=True)
-    def execute(self, family_id: int) -> list[ChoreEntity]:
+    def execute(
+        self,
+        family_id: int,
+        assigned_to_user_id: int | None = None,
+    ) -> list[ChoreEntity]:
         try:
-            return self.__list_today(family_id=family_id)
+            return self.__list_today(
+                family_id=family_id,
+                assigned_to_user_id=assigned_to_user_id,
+            )
         except Exception as error:
             if isinstance(error, BaseError):
                 raise error
             raise InternalError(code=InternalErrorCodes.LIST_TODAY_CHORE_ENTITIES_SERVICE_ERROR.code())
 
-    def __list_today(self, family_id: int) -> list[ChoreEntity]:
+    def __list_today(
+        self,
+        family_id: int,
+        assigned_to_user_id: int | None,
+    ) -> list[ChoreEntity]:
         current_week_day = datetime.now().weekday() + 1
-        chores = self.__chore_repository.find_today_chores(family_id, current_week_day)
+        chores = self.__chore_repository.find_today_chores(
+            family_id,
+            current_week_day,
+            assigned_to_user_id=assigned_to_user_id,
+        )
         return chores

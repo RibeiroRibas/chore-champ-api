@@ -25,7 +25,9 @@ class TestListTodayChoreEntitiesService(unittest.TestCase):
             mock_dt.now.return_value.weekday.return_value = 0
             result = self.service.execute(family_id=1)
         self.assertEqual(result, [])
-        self.mock_chore_repo.find_today_chores.assert_called_once_with(1, 1)
+        self.mock_chore_repo.find_today_chores.assert_called_once_with(
+            1, 1, assigned_to_user_id=None,
+        )
 
     def test_execute_returns_chores_from_find_today_chores(self):
         chore = ChoreEntity(
@@ -46,7 +48,20 @@ class TestListTodayChoreEntitiesService(unittest.TestCase):
             mock_dt.now.return_value.weekday.return_value = 2
             result = self.service.execute(family_id=42)
         self.assertEqual(result, [chore])
-        self.mock_chore_repo.find_today_chores.assert_called_once_with(42, 3)
+        self.mock_chore_repo.find_today_chores.assert_called_once_with(
+            42, 3, assigned_to_user_id=None,
+        )
+
+    def test_execute_passes_assigned_to_user_id_to_repository(self):
+        self.mock_chore_repo.find_today_chores.return_value = []
+        with patch(
+            "src.domain.services.list_today_chore_entities_service.datetime"
+        ) as mock_dt:
+            mock_dt.now.return_value.weekday.return_value = 0
+            self.service.execute(family_id=1, assigned_to_user_id=9)
+        self.mock_chore_repo.find_today_chores.assert_called_once_with(
+            1, 1, assigned_to_user_id=9,
+        )
 
     def test_execute_passes_weekday_plus_one_to_repository(self):
         self.mock_chore_repo.find_today_chores.return_value = []
@@ -55,7 +70,9 @@ class TestListTodayChoreEntitiesService(unittest.TestCase):
         ) as mock_dt:
             mock_dt.now.return_value.weekday.return_value = 6
             self.service.execute(family_id=1)
-        self.mock_chore_repo.find_today_chores.assert_called_once_with(1, 7)
+        self.mock_chore_repo.find_today_chores.assert_called_once_with(
+            1, 7, assigned_to_user_id=None,
+        )
 
     def test_execute_reraises_base_error(self):
         from src.domain.errors.bad_request_error import BadRequestError

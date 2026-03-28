@@ -22,6 +22,9 @@ from src.api.v1.requests.chores.create_chore_request import CreateChoreRequest
 from src.api.v1.requests.chores.get_chores_filtered_request import (
     GetChoresFilteredRequest,
 )
+from src.api.v1.requests.chores.list_today_chores_request import (
+    ListTodayChoresRequest,
+)
 from src.api.v1.requests.chores.update_chore_request import UpdateChoreRequest
 from src.api.v1.responses.chores.chore_response import ChoreResponse
 from src.api.v1.responses.chores.chore_reward_unlock_response import (
@@ -55,8 +58,12 @@ router = APIRouter(prefix="/family/chores")
 def list_today_chores(
     user: Annotated[CurrentUserEntity, Depends(get_current_user_entity)],
     use_case: Annotated[ListTodayChoresUseCase, Depends(list_today_chores_use_case)],
+    request: Annotated[ListTodayChoresRequest, Depends()],
 ) -> list[ChoreResponse]:
-    return use_case.execute(family_id=user.family_id)
+    return use_case.execute(
+        family_id=user.family_id,
+        assigned_to_user_id=request.assigned_to_user_id,
+    )
 
 
 @router.get(

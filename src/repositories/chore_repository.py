@@ -44,7 +44,12 @@ class ChoreRepository:
             self.db_session.flush()
         return model.to_entity()
 
-    def find_today_chores(self, family_id: int, current_week_day: int) -> list[ChoreEntity]:
+    def find_today_chores(
+        self,
+        family_id: int,
+        current_week_day: int,
+        assigned_to_user_id: int | None = None,
+    ) -> list[ChoreEntity]:
         query = (
             self.db_session.query(ChoreModel)
             .outerjoin(
@@ -74,8 +79,13 @@ class ChoreRepository:
                     ),
                 )
             )
-            .order_by(ChoreModel.created_at.desc())
+            .order_by(
+                ChoreModel.completed.asc(),
+                ChoreModel.created_at.desc(),
+            )
         )
+        if assigned_to_user_id is not None:
+            query = query.filter(ChoreModel.assigned_to_user_id == assigned_to_user_id)
         models: list[ChoreModel] = query.all()
         return [m.to_entity() for m in models]
 
@@ -98,7 +108,10 @@ class ChoreRepository:
             query = query.filter(ChoreModel.assigned_to_user_id == dto.assigned_to_user_id)
         total = query.count()
         models: list[ChoreModel] = (
-            query.order_by(ChoreModel.created_at.desc())
+            query.order_by(
+                ChoreModel.completed.asc(),
+                ChoreModel.created_at.desc(),
+            )
             .offset((dto.page - 1) * dto.page_size)
             .limit(dto.page_size)
             .all()
