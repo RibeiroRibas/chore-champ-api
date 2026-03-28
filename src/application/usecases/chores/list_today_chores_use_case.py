@@ -13,14 +13,25 @@ class ListTodayChoresUseCase:
         self.__list_today_chore_entities_service = list_today_chore_entities_service
 
     @logging(show_args=True, show_return=True)
-    def execute(self, family_id: int) -> list[ChoreResponse]:
+    def execute(
+        self,
+        family_id: int,
+        assigned_to_user_id: int | None = None,
+    ) -> list[ChoreResponse]:
         try:
-            return self.__list_today_chores(family_id)
+            return self.__list_today_chores(family_id, assigned_to_user_id)
         except Exception as error:
             if isinstance(error, BaseError):
                 raise error
             raise InternalError(code=InternalErrorCodes.LIST_CHORES_ERROR.code())
 
-    def __list_today_chores(self, family_id: int) -> list[ChoreResponse]:
-        result = self.__list_today_chore_entities_service.execute(family_id)
+    def __list_today_chores(
+        self,
+        family_id: int,
+        assigned_to_user_id: int | None,
+    ) -> list[ChoreResponse]:
+        result = self.__list_today_chore_entities_service.execute(
+            family_id,
+            assigned_to_user_id=assigned_to_user_id,
+        )
         return [ChoreResponse.from_entity(e) for e in result]

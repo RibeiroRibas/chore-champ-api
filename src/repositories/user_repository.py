@@ -74,21 +74,24 @@ class UserRepository:
             return []
         result: list[FamilyMemberRankingEntity] = []
         for m in models:
-            points = (
-                m.user_points.to_entity().available_points()
-                if m.user_points
-                else 0
-            )
+            if m.user_points:
+                pe = m.user_points.to_entity()
+                ranking_points = pe.total_points
+                available_points = pe.available_points()
+            else:
+                ranking_points = 0
+                available_points = 0
             result.append(
                 FamilyMemberRankingEntity(
                     id=m.id,
                     name=m.name,
-                    points=points,
+                    ranking_points=ranking_points,
+                    available_points=available_points,
                     role_name=m.role.name,
                     avatar=m.avatar or "👤",
                 )
             )
-        result.sort(key=lambda e: e.points, reverse=True)
+        result.sort(key=lambda e: e.ranking_points, reverse=True)
         return result
 
     def delete_by_id(self, user_id: int, commit: bool = True) -> None:

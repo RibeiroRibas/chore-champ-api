@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from src.domain.schemas.entity.current_user_entity import CurrentUserEntity
 from src.domain.schemas.entity.day_of_week_entity import DayOfWeekEntity
 from src.domain.errors.bad_request_error import BadRequestError
@@ -83,6 +85,11 @@ class ChoreEntity:
                 raise BadRequestError(
                     code=BadRequestErrorCode.COLLABORATOR_CAN_ONLY_COMPLETE_TODAY_CHORES.code()
                 )
+
+        current_week_day: int = datetime.today().weekday() + 1
+        recurrency_day_id: list[int] = [recurrence_day.id for recurrence_day in self.recurrence_days]
+        if recurrency_day_id and current_week_day not in recurrency_day_id:
+            raise BadRequestError(code=BadRequestErrorCode.CHORE_CAN_ONLY_BE_COMPLETED_TODAY.code())
 
     def is_chore_in_today_list(self, today_chores: list[ChoreEntity]) -> bool:
         return any(e.id == self.id for e in today_chores)

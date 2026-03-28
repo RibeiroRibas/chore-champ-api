@@ -19,7 +19,7 @@ class TestListTodayChoresUseCase(unittest.TestCase):
         self.mock_service.execute.return_value = []
         result = self.use_case.execute(family_id=1)
         self.assertEqual(result, [])
-        self.mock_service.execute.assert_called_once_with(1)
+        self.mock_service.execute.assert_called_once_with(1, assigned_to_user_id=None)
 
     def test_execute_returns_responses_for_each_chore(self):
         chores = [
@@ -35,10 +35,14 @@ class TestListTodayChoresUseCase(unittest.TestCase):
             ),
         ]
         self.mock_service.execute.return_value = chores
-        result = self.use_case.execute(family_id=1)
+        result = self.use_case.execute(family_id=1, assigned_to_user_id=2)
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0].id, 1)
         self.assertEqual(result[0].title, "Tarefa 1")
+        self.mock_service.execute.assert_called_once_with(
+            1,
+            assigned_to_user_id=2,
+        )
 
     def test_execute_reraises_base_error(self):
         from src.domain.errors.bad_request_error import BadRequestError

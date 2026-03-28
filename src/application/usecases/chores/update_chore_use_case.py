@@ -1,14 +1,16 @@
 from src.api.v1.requests.chores.update_chore_request import UpdateChoreRequest
-from src.domain.schemas.dto.chores.update_chore_dto import UpdateChoreDTO
-from src.domain.schemas.dto.users.add_user_points_dto import AddUserPointsDTO
-from src.domain.schemas.entity.chore_entity import ChoreEntity
-from src.domain.schemas.entity.current_user_entity import CurrentUserEntity
 from src.domain.errors.bad_request_error import BadRequestError
 from src.domain.errors.base_error import BaseError
 from src.domain.errors.codes.bad_request_error_codes import BadRequestErrorCode
 from src.domain.errors.codes.internal_error_codes import InternalErrorCodes
 from src.domain.errors.internal_error import InternalError
+from src.domain.schemas.dto.chores.create_chore_dto import CreateChoreDTO
 from src.domain.schemas.dto.chores.recurring_chore_dto import RecurringChoreDTO
+from src.domain.schemas.dto.chores.update_chore_dto import UpdateChoreDTO
+from src.domain.schemas.dto.users.add_user_points_dto import AddUserPointsDTO
+from src.domain.schemas.entity.chore_entity import ChoreEntity
+from src.domain.schemas.entity.current_user_entity import CurrentUserEntity
+from src.domain.services.create_chore_service import CreateChoreService
 from src.domain.services.detect_new_reward_unlocked_service import (
     DetectNewRewardUnlockedService,
 )
@@ -29,6 +31,7 @@ class UpdateChoreUseCase:
         save_user_points_service: SaveUserPointsService,
         list_today_chore_entities_service: ListTodayChoreEntitiesService,
         detect_new_reward_unlocked_service: DetectNewRewardUnlockedService,
+        create_chore_use_case: CreateChoreService,
     ):
         self.chore_repository = chore_repository
         self.get_chore_service = get_chore_service
@@ -36,6 +39,7 @@ class UpdateChoreUseCase:
         self.save_user_points_service = save_user_points_service
         self.list_today_chore_entities_service = list_today_chore_entities_service
         self.detect_new_reward_unlocked_service = detect_new_reward_unlocked_service
+        self.__create_chore_service = create_chore_use_case
 
     @logging(show_args=True, show_return=True)
     def execute(self, chore_id: int, current_user: CurrentUserEntity, request: UpdateChoreRequest) -> bool:
@@ -55,25 +59,32 @@ class UpdateChoreUseCase:
 
         self.__validate_can_update(chore_id, current_user, request)
 
-        if request.is_recurring:
-            self.update_recurring_chore(current_user, chore_id, request)
+        self.__update_recurring_chore(current_user, chore_id, request)
 
-        new_reward_unlocked = self.__detect_new_reward_unlocked_and_update_points(request, current_user)
+        new_reward_unlocked = self.__detect_new_reward_unlocked_and_update(request, current_user, chore_id)
 
-        self.__update_chore(chore_id, current_user, request)
-        return new_reward_unlocked
+        return new_reward_unlocked and request.assigned_to_user_id == current_user.user_id
 
-    def __detect_new_reward_unlocked_and_update_points(self, request: UpdateChoreRequest, current_user: CurrentUserEntity) -> bool:
+    def __detect_new_reward_unlocked_and_update(self, request: UpdateChoreRequest, current_user: CurrentUserEntity, chore_id: int) -> bool:
         new_reward_unlocked = False
         if request.completed and request.assigned_to_user_id is not None:
             check = self.detect_new_reward_unlocked_service.execute(
                 user_id=request.assigned_to_user_id,
-                mutate_points=lambda: self.__update_user_points(current_user, request),
+                mutate_points=lambda: self.__update_chore_and_user_points(current_user, request, chore_id),
             )
             new_reward_unlocked = check.new_reward_unlocked
+        else:
+            self.__update_chore(chore_id, current_user, request)
         return new_reward_unlocked
 
-    def __update_user_points(self, current_user: CurrentUserEntity, request: UpdateChoreRequest):
+    def __update_chore_and_user_points(self, current_user: CurrentUserEntity, request: UpdateChoreRequest, chore_id: int):
+        if request.is_recurring and request.completed:
+            self.__create_chore_copy(current_user, request)
+
+        self.__update_chore(chore_id, current_user, request)
+        self.__add_user_points(current_user, request)
+
+    def __add_user_points(self, current_user: CurrentUserEntity, request: UpdateChoreRequest):
         points_dto = AddUserPointsDTO(
             user_id=request.assigned_to_user_id,
             points=request.points,
@@ -81,18 +92,31 @@ class UpdateChoreUseCase:
         )
         self.save_user_points_service.execute(dto=points_dto)
 
+    def __create_chore_copy(self, current_user: CurrentUserEntity, request: UpdateChoreRequest):
+        dto = CreateChoreDTO(
+            family_id=current_user.family_id,
+            title=request.title,
+            emoji=request.emoji,
+            points=request.points,
+            created_by_user_id=current_user.user_id,
+            assigned_to_user_id=request.assigned_to_user_id,
+            completed=request.completed,
+        )
+        self.__create_chore_service.execute(dto=dto, commit=False)
+
     def __update_chore(
         self,
         chore_id: int,
         current_user: CurrentUserEntity,
         request: UpdateChoreRequest,
     ):
+        should_commit = request.completed is False
         dto = UpdateChoreDTO(
             title=request.title,
             emoji=request.emoji,
             points=request.points,
             assigned_to_user_id=request.assigned_to_user_id,
-            completed=request.completed,
+            completed=request.completed if request.is_recurring is False else False,
             is_recurring=request.is_recurring,
             recurrence_day_ids=request.recurrence_day_ids,
         )
@@ -101,6 +125,7 @@ class UpdateChoreUseCase:
             chore_id=chore_id,
             family_id=current_user.family_id,
             update_chore_dto=dto,
+            commit=should_commit,
         )
 
     def __validate_can_update(self, chore_id: int, current_user: CurrentUserEntity, request: UpdateChoreRequest):
@@ -112,12 +137,12 @@ class UpdateChoreUseCase:
             today_chores = self.list_today_chore_entities_service.execute(current_user.family_id)
             entity.validate_can_complete(current_user, today_chores)
 
-    def update_recurring_chore(self, current_user: CurrentUserEntity, chore_id: int, request: UpdateChoreRequest):
+    def __update_recurring_chore(self, current_user: CurrentUserEntity, chore_id: int, request: UpdateChoreRequest):
         recurring_dto = RecurringChoreDTO(
             family_id=current_user.family_id,
             chore_id=chore_id,
-            day_of_the_week_ids=request.recurrence_day_ids,
+            day_of_the_week_ids=request.recurrence_day_ids if request.recurrence_day_ids is not None else [],
             is_recurring=request.is_recurring,
             is_chore_completed=request.completed,
         )
-        self.recurring_chore_service.execute(recurring_dto)
+        self.recurring_chore_service.execute(dto=recurring_dto, commit=False)
